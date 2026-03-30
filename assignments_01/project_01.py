@@ -76,7 +76,7 @@ def create_update_csv(folder, file_list):
     output_csv(merged_dataframe)
     return merged_dataframe
 
-create_update_csv(folder, file_list)
+#create_update_csv(folder, file_list)
 
 #Created a merged_dataframe variable for global use. Easier to test and understand. Also marks the end of Task 1 of mini-project
 #merged_dataframe = create_update_csv(folder, file_list)
@@ -167,7 +167,7 @@ def hist_distributions(dataframe):
     output_file('happiness_histogram.png')
 
 #Outputs hist_distribution to outputs folder
-hist_distributions(df)
+#hist_distributions(df)
 
 """
 Boxplot comparing happiness score distributions across years (one box per year). Save as happiness_by_year.png
@@ -203,7 +203,7 @@ def gdp_vs_happiness(df):
     #Display the plot
     plt.show()
 
-gdp_vs_happiness(df)
+#gdp_vs_happiness(df)
 
 
 
@@ -281,14 +281,24 @@ def region_compare():
 #Task 5: Correlation and Multiple Comparisons
 
 x = df["Happiness score"]
+#print(x)
 number_of_tests = 0
+
+
 for col in df.columns:
     y = df[col]
+
+    
+
+"""
     r, p = pearsonr(x, y)
     print(f"Correlation: {r}, p-value: {p}")
     number_of_tests += 1
 
+print("Correlation:", round(r, 2))
+print("p-value:,", round(p, 4))
 
 #Bonferroni Correction: divide significance threshold by the number of test you ran
 
 print(adjusted_alpha = 0.05 / number_of_tests)
+"""
