@@ -114,16 +114,13 @@ merged_file = "outputs\\merged_happiness.csv"
 df = pd.read_csv(merged_file)
 
 
-#Returning error unhashable type: 'Series'
-
-#Also see this: Warning: Starting with pandas version 4.0 all arguments of mean will be keyword-only.
 def happiness_stats(merged_dataframe):
     mean = merged_dataframe['Happiness score'].mean()
     median = merged_dataframe['Happiness score'].median()
     std = merged_dataframe['Happiness score'].std()
     return mean, median, std
 
-
+#happiness_stats(df)
 
 #---------------------------- Task 3 -----------------------------
 
@@ -282,26 +279,38 @@ def region_compare():
 #Task 5: Correlation and Multiple Comparisons
 
 
-x = df["Happiness score"]
-number_of_tests = 0
+def comparison_to_happiness(dataframe):
+    x = dataframe["Happiness score"]
+    results_list = []
+    number_of_tests = 0
+    for col in dataframe.columns:
+        if is_numeric_dtype(df[col]):
+            if col == "Happiness score":
+                continue
+            y = df[col]
+            r, p = pearsonr(x, y)
+            print(f"Correlation: {r}, p-value: {p}")
+            number_of_tests += 1
 
+            correlation_to_happiness = {
 
-for col in df.columns:
-    y = []
-    if is_numeric_dtype(df[col]):
-        y = df[col].copy
-        r, p = pearsonr(x, y)
-        print(f"Correlation: {r}, p-value: {p}")
-        number_of_tests += 1
+            "column": col,
+            "correlation": r,
+            "p-value": p
+            }
 
-        print("Correlation:", round(r, 2))
-        print("p-value:,", round(p, 4))
+            results_list.append(correlation_to_happiness)
 
-    else:
-        continue
+            print("Correlation:", round(r, 2))
+            print("p-value:,", round(p, 4))
+    return results_list, number_of_tests
+    
 
-adjusted_alpha = 0.05 / number_of_tests
-
+def adjusted_alpha_test(dataframe):
+    comparison_to_happiness(dataframe)
+    comparison_to_happiness
+    adjusted_alpha = 0.05 / number_of_tests
+#comparison_to_happiness(df)
 """
 
   
