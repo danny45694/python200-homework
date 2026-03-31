@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 from scipy import stats
 from scipy.stats import pearsonr
+from pandas.api.types import is_numeric_dtype
 #from prefect import task, flow (Comment out for now. Clean print statements)
 #from prefect.logging import get_run_logger (use above comment on prefect)
 import seaborn as sns
@@ -280,25 +281,32 @@ def region_compare():
 
 #Task 5: Correlation and Multiple Comparisons
 
+
 x = df["Happiness score"]
-#print(x)
 number_of_tests = 0
 
 
 for col in df.columns:
-    y = df[col]
+    y = []
+    if is_numeric_dtype(df[col]):
+        y = df[col].copy
+        r, p = pearsonr(x, y)
+        print(f"Correlation: {r}, p-value: {p}")
+        number_of_tests += 1
 
-    
+        print("Correlation:", round(r, 2))
+        print("p-value:,", round(p, 4))
 
+    else:
+        continue
+
+adjusted_alpha = 0.05 / number_of_tests
+print()
 """
-    r, p = pearsonr(x, y)
-    print(f"Correlation: {r}, p-value: {p}")
-    number_of_tests += 1
 
-print("Correlation:", round(r, 2))
-print("p-value:,", round(p, 4))
-
+  
 #Bonferroni Correction: divide significance threshold by the number of test you ran
 
-print(adjusted_alpha = 0.05 / number_of_tests)
+#print(adjusted_alpha = 0.05 / number_of_tests)
+
 """
