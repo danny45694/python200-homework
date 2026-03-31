@@ -301,7 +301,7 @@ for col in df.columns:
         continue
 
 adjusted_alpha = 0.05 / number_of_tests
-print()
+
 """
 
   
