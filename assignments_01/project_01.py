@@ -12,22 +12,19 @@ import seaborn as sns
 
 #---------------------------------Task 1------------------------------
 folder = "happiness_project"
-file_list = []
-
-
-
 
 #Function to add files to file_list
 
 #@task
 def file_path(folder):
-    for file in os.listdir(folder):
-        full_path = os.path.join(folder, file)
-        file_list.append(full_path)
-    return file_list
-    
-#print(file_path(folder))
-
+    file_list = []
+    folder = "happiness_project"
+    if os.makedirs(folder, exist_ok=True):
+        for file in os.listdir(folder):
+            full_path = os.path.join(folder, file)
+            file_list.append(full_path)
+        return file_list
+    else: print("happiness folder does not exist.")
 #Convert each csv file into a dataframe, add column with index=year. Add to a list
 
 #@task
@@ -46,8 +43,7 @@ def convert_list(file_list):
             df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
         
         #new list with created data frames
-        converted_list.append(df)
-    #removed print statements. This should now handle all 10 files    
+        converted_list.append(df)  
     return converted_list
 
 
@@ -57,26 +53,35 @@ def merge_dataframes(converted_list):
     merged_dataframe = pd.concat(converted_list)
     return merged_dataframe
 
-#@task
-def output_csv(merged_dataframe):
+
+def output_filepath():
     # Specify file path using the os module
     output_dir = "outputs"
+
+    # can swap for user prompt to adjust name
+    string = "merged_happiness.csv"
     #Check if it exists
     os.makedirs(output_dir, exist_ok=True)
     #Create complete filepath + filename
-    output_filepath = os.path.join(output_dir, 'merged_happiness.csv')
+    output_filepath = os.path.join(output_dir, string)
+    return output_filepath
 
+#@task
+def write_csv(output_filepath, merged_dataframe):
     #Writing CSV file
     merged_dataframe.to_csv(output_filepath, index=False)
     print(f"CSV file successfully written to {output_filepath} using pandas")
     
 
 #@task(retries=3, retry_delay_seconds=2)
-def create_update_csv(folder, file_list):
-    file_list = file_path(folder)
-    converted_list = convert_list(file_list)
+def create_update_csv():
+    file_path = file_path(folder)
+    converted_list = convert_list(file_path)
     merged_dataframe = merge_dataframes(converted_list)
-    output_csv(merged_dataframe)
+    output_filepath = output_filepath()
+    write_csv(merged_dataframe, output_filepath)
+
+
     return merged_dataframe
 
 
@@ -101,6 +106,7 @@ df = pd.read_csv(merged_file)
 
 #@task
 def happiness_stats(merged_dataframe):
+
     mean = merged_dataframe['Happiness score'].mean()
     median = merged_dataframe['Happiness score'].median()
     std = merged_dataframe['Happiness score'].std()
@@ -110,24 +116,6 @@ def happiness_stats(merged_dataframe):
 
 #---------------------------- Task 3 -----------------------------
 
-#I want to graph the happiness score of each country by year. How can I accomplish that. 
-
-"""
-What we know?
-
-
-1. The program must know to go by year, not up to 2024
-2. There are ~ 157 countries in each csv
-3. Says all happiness scores across all years.
-
-Q. A histogram of all happiness scores across all years
-Keyword all
-
-Instructions do not specify graph each country. 
-
-Conclusion: Take the mean of all countries, graph that across 9 years
-
-"""
 
 def output_file(string):
     output_dir = "outputs"
@@ -295,16 +283,25 @@ def comparison_to_happiness(dataframe):
             print("p-value:,", round(p, 4))
     return results_list, number_of_tests
     
-
+#@task
 def adjusted_alpha_test(dataframe):
     results_list, number_of_tests = comparison_to_happiness(dataframe)
     adjusted_alpha = 0.05 / number_of_tests
 
     for item in results_list:
         item['adjusted_alpha'] = item['p-value'] < adjusted_alpha
-        return
+    return results_list
 #comparison_to_happiness(df)
 
+def happiness_pipeline():
+
+
+
+
+
+
+
+
 if __name__ == "__main__":
-    happiness_pipeline(arr)
+    happiness_pipeline()
   

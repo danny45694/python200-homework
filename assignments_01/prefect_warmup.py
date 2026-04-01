@@ -61,8 +61,8 @@ def summarize_data(series):
 def data_pipeline(arr):
     logger = get_run_logger()
     values = create_series(arr)
-    clean_data(values)
-    summary = summarize_data(values)
+    clean_data = clean_data(values)
+    summary = summarize_data(clean_data)
     logger.info(summary)
 
 
