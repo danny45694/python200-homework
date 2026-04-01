@@ -114,7 +114,7 @@ merged_file = "outputs\\merged_happiness.csv"
 #Creates dataframe from merged file
 df = pd.read_csv(merged_file)
 
-
+#@task
 def happiness_stats(merged_dataframe):
     mean = merged_dataframe['Happiness score'].mean()
     median = merged_dataframe['Happiness score'].median()
@@ -151,6 +151,8 @@ def output_file(string):
 
 
 # I need to get the mean happiness score of all countries in a file
+
+#@task
 def hist_distributions(dataframe):
     mean_by_year = dataframe.groupby(dataframe['Year'])['Happiness score'].mean()
     #print(mean_by_year)
@@ -172,6 +174,7 @@ def hist_distributions(dataframe):
 Boxplot comparing happiness score distributions across years (one box per year). Save as happiness_by_year.png
 """
 
+#@task
 def happiness_across_years(df):
 
     happiness_score = []
@@ -188,7 +191,7 @@ def happiness_across_years(df):
 
 #happiness_across_years(df)
 
-
+#@task
 def gdp_vs_happiness(df):
 
     df.plot.scatter(x="GDP per capita", y="Happiness score")
@@ -205,7 +208,7 @@ def gdp_vs_happiness(df):
 #gdp_vs_happiness(df)
 
 
-
+#@task
 def correlation_heatmap(dataframe):
     data = dataframe[["Happiness score", "GDP per capita", "Social support", "Freedom to make life choices", "Generosity", "Perceptions of corruption"]].copy()
 
@@ -219,7 +222,7 @@ def correlation_heatmap(dataframe):
 
 
 #Compare happiness scores from 2019 to 2020
-
+#@task
 def testing_happiness(df):
     groups = {}
 
@@ -254,6 +257,7 @@ def testing_happiness(df):
 #Got an error. Need to separate the happiness_scores into 2 groups
 #They are all bunched up together. I did not program in an identifier. Similar code to the boxplot problem we did above.
 
+#@task
 def region_compare():
     groups ={}
 
@@ -279,7 +283,7 @@ def region_compare():
 
 #Task 5: Correlation and Multiple Comparisons
 
-
+#@task
 def comparison_to_happiness(dataframe):
     x = dataframe["Happiness score"]
     results_list = []
