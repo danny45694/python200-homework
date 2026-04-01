@@ -52,11 +52,12 @@ def convert_list(file_list):
 
 
 #Merge dataframes together
+#@task
 def merge_dataframes(converted_list):
     merged_dataframe = pd.concat(converted_list)
     return merged_dataframe
 
-
+#@task
 def output_csv(merged_dataframe):
     # Specify file path using the os module
     output_dir = "outputs"
@@ -307,15 +308,14 @@ def comparison_to_happiness(dataframe):
     
 
 def adjusted_alpha_test(dataframe):
-    comparison_to_happiness(dataframe)
-    comparison_to_happiness
+    results_list, number_of_tests = comparison_to_happiness(dataframe)
     adjusted_alpha = 0.05 / number_of_tests
+
+    for item in results_list:
+        item['adjusted_alpha'] = item['p-value'] < adjusted_alpha
+        return
 #comparison_to_happiness(df)
-"""
 
+if __name__ == "__main__":
+    happiness_pipeline(arr)
   
-#Bonferroni Correction: divide significance threshold by the number of test you ran
-
-#print(adjusted_alpha = 0.05 / number_of_tests)
-
-"""
