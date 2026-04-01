@@ -61,8 +61,9 @@ def merge_dataframes(converted_list):
 def output_csv(merged_dataframe):
     # Specify file path using the os module
     output_dir = "outputs"
-    #Create the directory if it doesn't exist (Later task will require we do this for the histograms. Need to make this a separate function)
+    #Check if it exists
     os.makedirs(output_dir, exist_ok=True)
+    #Create complete filepath + filename
     output_filepath = os.path.join(output_dir, 'merged_happiness.csv')
 
     #Writing CSV file
@@ -78,24 +79,8 @@ def create_update_csv(folder, file_list):
     output_csv(merged_dataframe)
     return merged_dataframe
 
-#create_update_csv(folder, file_list)
-
-#Created a merged_dataframe variable for global use. Easier to test and understand. Also marks the end of Task 1 of mini-project
-#merged_dataframe = create_update_csv(folder, file_list)
-
 
 #-----------------------------Task 2 -----------------------------
-
-
-"""
-Compute and log overall descriptive statistics for happiness_score: mean, median, and standard deviation.
-
-Then compute and log the mean happiness score grouped by year and by region. Looking at the regional breakdown is often the most interesting part of this dataset -- you may already have a hypothesis about which regions rank highest before you run the numbers.
-
-"""
-#Creating file_path to merged csv file for later testing
-
-#This may be a bit more redundant than I thought for simple testing. I'll leave it here for now as it may be one of the finishing touches.
  
 outputs = 'outputs'
 output_file_list = []
