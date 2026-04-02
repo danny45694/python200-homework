@@ -6,29 +6,33 @@ import numpy as np
 from scipy import stats
 from scipy.stats import pearsonr
 from pandas.api.types import is_numeric_dtype
-#from prefect import task, flow (Comment out for now. Clean print statements)
-#from prefect.logging import get_run_logger (use above comment on prefect)
+from prefect import task, flow
+from prefect.logging import get_run_logger 
 import seaborn as sns
 
 #---------------------------------Task 1------------------------------
-folder = "happiness_project"
 
 #Function to add files to file_list
 
-#@task
-def file_path(folder):
+@task
+def file_path():
+    logger = get_run_logger()
     file_list = []
     folder = "happiness_project"
-    if os.makedirs(folder, exist_ok=True):
-        for file in os.listdir(folder):
-            full_path = os.path.join(folder, file)
-            file_list.append(full_path)
-        return file_list
-    else: print("happiness folder does not exist.")
+    if not os.path.exists(folder):
+        logger.warning("Folder not found: %s", folder)
+        return []
+    for file in os.listdir(folder):
+        full_path = os.path.join(folder, file)
+        file_list.append(full_path)
+    logger.info("Found %d files in %s", len(file_list), folder)
+    return file_list
+    
 #Convert each csv file into a dataframe, add column with index=year. Add to a list
 
-#@task
+@task
 def convert_list(file_list):
+    logger = get_run_logger()
     converted_list = []
     for file in file_list:
         #Find year in each file
@@ -43,18 +47,23 @@ def convert_list(file_list):
             df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
         
         #new list with created data frames
-        converted_list.append(df)  
+        converted_list.append(df)
+    logger.info("Files successfully converted to dataframe and added to list")  
     return converted_list
 
 
 #Merge dataframes together
-#@task
+@task
 def merge_dataframes(converted_list):
+    logger = get_run_logger()
     merged_dataframe = pd.concat(converted_list)
+    logger.info("Dataframes in list successfully merged together")
     return merged_dataframe
 
-
+@task
 def output_filepath():
+    logger = get_run_logger()
+    logger.info("Calling or creating output folder")
     # Specify file path using the os module
     output_dir = "outputs"
 
@@ -64,59 +73,41 @@ def output_filepath():
     os.makedirs(output_dir, exist_ok=True)
     #Create complete filepath + filename
     output_filepath = os.path.join(output_dir, string)
+    logger.info("output folder successfully verified. File path successfully completed")
     return output_filepath
 
-#@task
-def write_csv(output_filepath, merged_dataframe):
+@task
+def write_csv(merged_dataframe, output_filepath):
+    logger = get_run_logger()
     #Writing CSV file
     merged_dataframe.to_csv(output_filepath, index=False)
-    print(f"CSV file successfully written to {output_filepath} using pandas")
+
+    logger.info(f"CSV file successfully written to {output_filepath} using pandas")
     
 
-#@task(retries=3, retry_delay_seconds=2)
-def create_update_csv():
-    file_path = file_path(folder)
-    converted_list = convert_list(file_path)
-    merged_dataframe = merge_dataframes(converted_list)
-    output_filepath = output_filepath()
-    write_csv(merged_dataframe, output_filepath)
+@task(retries=3, retry_delay_seconds=2)
+def create_update_csv(merged, filepath):
+    logger = get_run_logger()
+    write_csv(merged, filepath)
+    logger.info("Created CSV file from merged dataframe. Returning dataframe for use")
 
 
-    return merged_dataframe
+#----------------------------- Task 2 -----------------------------
 
-
-#-----------------------------Task 2 -----------------------------
- 
-outputs = 'outputs'
-output_file_list = []
-def output_path(folder):
-    for file in os.listdir(folder):
-        full_path = os.path.join(folder, file)
-        output_file_list.append(full_path)
-    return output_file_list
-
-
-#Because of the code above, I may need code to re-transform the csv file to a dataframe so I can use it for the next set of tasks
-
-#Simple path to file for next tasks.
-merged_file = "outputs\\merged_happiness.csv"
-
-#Creates dataframe from merged file
-df = pd.read_csv(merged_file)
-
-#@task
-def happiness_stats(merged_dataframe):
-
-    mean = merged_dataframe['Happiness score'].mean()
-    median = merged_dataframe['Happiness score'].median()
-    std = merged_dataframe['Happiness score'].std()
+@task
+def happiness_stats(dataframe):
+    logger = get_run_logger()
+    mean = dataframe['Happiness score'].mean()
+    median = dataframe['Happiness score'].median()
+    std = dataframe['Happiness score'].std()
+    logger.info("Mean: %.2f | Median: %.2f | Std: %.2f", mean, median, std)
     return mean, median, std
 
-#happiness_stats(df)
 
 #---------------------------- Task 3 -----------------------------
 
-
+#Specific output function for saving plots
+@task
 def output_file(string):
     output_dir = "outputs"
     output_filepath = os.path.join(output_dir, string)
@@ -125,11 +116,11 @@ def output_file(string):
 
 # I need to get the mean happiness score of all countries in a file
 
-#@task
+@task
 def hist_distributions(dataframe):
     mean_by_year = dataframe.groupby(dataframe['Year'])['Happiness score'].mean()
     #print(mean_by_year)
-    plt.subplot(1,2,1)
+    plt.figure()
 
     plt.hist(mean_by_year, bins=5)
     plt.title('How happiness scores are distributed worldwide over the past nine years')
@@ -137,51 +128,37 @@ def hist_distributions(dataframe):
     plt.ylabel("Happiness score")
 
     #Save to outputs folder
-
     output_file('happiness_histogram.png')
 
-#Outputs hist_distribution to outputs folder
-#hist_distributions(df)
-
-"""
-Boxplot comparing happiness score distributions across years (one box per year). Save as happiness_by_year.png
-"""
-
-#@task
-def happiness_across_years(df):
+@task
+def happiness_across_years(dataframe):
 
     happiness_score = []
     labels = []
-
-    for year, group in df.groupby('Year', sort=False):
-        happiness_score.append(group)
+    for year, group in dataframe.groupby('Year', sort=False):
+        happiness_score.append(group["Happiness score"].values)
         labels.append(year)
 
     plt.boxplot(happiness_score, labels=labels)
     plt.show()
-
     output_file('happiness_by_year.png')
 
-#happiness_across_years(df)
+@task
+def gdp_vs_happiness(dataframe):
 
-#@task
-def gdp_vs_happiness(df):
-
-    df.plot.scatter(x="GDP per capita", y="Happiness score")
-
+    dataframe.plot.scatter(x="GDP per capita", y="Happiness score")
     plt.title("GDP and Happiness")
     plt.xlabel("GDP")
     plt.ylabel("Happiness")
-    
     output_file("gdp_vs_happiness.png")
 
     #Display the plot
     plt.show()
 
-#gdp_vs_happiness(df)
 
 
-#@task
+
+@task
 def correlation_heatmap(dataframe):
     data = dataframe[["Happiness score", "GDP per capita", "Social support", "Freedom to make life choices", "Generosity", "Perceptions of corruption"]].copy()
 
@@ -191,16 +168,17 @@ def correlation_heatmap(dataframe):
     plt.show()
 
 #correlation_heatmap(df)
+
 #Task 4: Hypothesis Testing
 
-
 #Compare happiness scores from 2019 to 2020
-#@task
-def testing_happiness(df):
+
+@task
+def testing_happiness(dataframe):
     groups = {}
 
     # Group data
-    for year, group in df.groupby("Year"):
+    for year, group in dataframe.groupby("Year"):
         if year in [2019, 2020]:
             groups[year] = group["Happiness score"]
 
@@ -213,7 +191,6 @@ def testing_happiness(df):
     mean_2020 = group_2020.mean()
 
     # T-test 
-
     t_stat, p_val = stats.ttest_ind(group_2019, group_2020)
 
     #Log the t-stat, p-value, mean happiness for each group
@@ -227,15 +204,12 @@ def testing_happiness(df):
     else:
         print("No statistically significant difference detected.")
 
-#Got an error. Need to separate the happiness_scores into 2 groups
-#They are all bunched up together. I did not program in an identifier. Similar code to the boxplot problem we did above.
-
-#@task
-def region_compare():
+@task
+def region_compare(dataframe):
     groups ={}
 
     #Group Data
-    for Country, group in df.groupby("Country"):
+    for Country, group in dataframe.groupby("Country"):
         if Country in ["Switzerland", "Denmark"]:
             groups[Country] = group["Happiness score"]
 
@@ -253,25 +227,23 @@ def region_compare():
     print("P-value:", p_value)
 
 
-
 #Task 5: Correlation and Multiple Comparisons
 
-#@task
+@task
 def comparison_to_happiness(dataframe):
     x = dataframe["Happiness score"]
     results_list = []
     number_of_tests = 0
     for col in dataframe.columns:
-        if is_numeric_dtype(df[col]):
+        if is_numeric_dtype(dataframe[col]):
             if col == "Happiness score":
                 continue
-            y = df[col]
+            y = dataframe[col]
             r, p = pearsonr(x, y)
             print(f"Correlation: {r}, p-value: {p}")
             number_of_tests += 1
 
             correlation_to_happiness = {
-
             "column": col,
             "correlation": r,
             "p-value": p
@@ -283,7 +255,7 @@ def comparison_to_happiness(dataframe):
             print("p-value:,", round(p, 4))
     return results_list, number_of_tests
     
-#@task
+@task
 def adjusted_alpha_test(dataframe):
     results_list, number_of_tests = comparison_to_happiness(dataframe)
     adjusted_alpha = 0.05 / number_of_tests
@@ -291,16 +263,39 @@ def adjusted_alpha_test(dataframe):
     for item in results_list:
         item['adjusted_alpha'] = item['p-value'] < adjusted_alpha
     return results_list
-#comparison_to_happiness(df)
 
+
+@flow
 def happiness_pipeline():
+    logger = get_run_logger()
 
+    # --- Task 1: Build the dataset ---
+    logger.info("Starting pipeline: loading files")
+    file_list = file_path()
+    converted = convert_list(file_list)
+    dataframe = merge_dataframes(converted)
+    filepath = output_filepath()
+    write_csv(dataframe, filepath)
 
+    # --- Task 2: Descriptive stats ---
+    logger.info("Descriptive statistics")
+    happiness_stats(dataframe)
 
+    # --- Task 3: Visualisations ---
+    logger.info("Generating plots")
+    hist_distributions(dataframe)
+    happiness_across_years(dataframe)
+    gdp_vs_happiness(dataframe)
+    correlation_heatmap(dataframe)
 
+    # --- Task 4: Hypothesis testing ---
+    logger.info("Running hypothesis tests")
+    testing_happiness(dataframe)
+    region_compare(dataframe)
 
-
-
+    # --- Task 5: Correlations ---
+    logger.info("Running correlation analysis")
+    adjusted_alpha_test(dataframe)
 
 if __name__ == "__main__":
     happiness_pipeline()
