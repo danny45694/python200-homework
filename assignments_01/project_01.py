@@ -156,8 +156,6 @@ def gdp_vs_happiness(dataframe):
     plt.show()
 
 
-
-
 @task
 def correlation_heatmap(dataframe):
     data = dataframe[["Happiness score", "GDP per capita", "Social support", "Freedom to make life choices", "Generosity", "Perceptions of corruption"]].copy()
@@ -166,8 +164,6 @@ def correlation_heatmap(dataframe):
     sns.heatmap(corr_matrix, annot=True)
     output_file("correlation_heatmap.png")
     plt.show()
-
-#correlation_heatmap(df)
 
 #Task 4: Hypothesis Testing
 
