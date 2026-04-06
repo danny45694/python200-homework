@@ -225,26 +225,21 @@ plt.show()
 
 #Q4 You are given two datasets: one normally distributed and one 'exponential' distribution. See instructions and code below
 
-"""
-Create side-by-side boxplots comparing the two distributions. Label each boxplot appropriately ("Normal" and "Exponential") and add a title "Distribution Comparison".
-
-Then, add a comment in your code briefly noting which distribution is more skewed, and which descriptive statistic (mean or median) would provide a more appropriate measure of central tendency for each distribution.
-
-"""
 
 normal_data = np.random.normal(50, 5, 200)
 skewed_data = np.random.exponential(10, 200)
 
 
-"""
+
 plt.boxplot([normal_data, skewed_data], tick_labels=["Normal", "Exponential"])
 plt.title("Distribution Comparison")
 plt.ylabel("Value")
 plt.show()
 
-"""
 
-#Need to add a comment on which descriptive statistic (mean or median) would be more appropriate measure of central tendency for each distribution
+# The exponential distribution is more skewed, its boxplot shows a long many outliers. The normal distribution is more aligned towards the center. 
+#For the Normal distribution, mean is better because the data is symmertric.
+#For the exponential distribution, the median is better because of the outliers put the mean towards the tail. This heavily skews where most of the values would actually fall. 
 
 #Q5 Print the mean, median, and mode of the following:
 
@@ -310,19 +305,20 @@ t_statistic, p_value = stats.ttest_rel(before, after)
 
 scores = [72, 68, 75, 70, 69, 74, 71, 73]
 
-#q4_tstat, p_val = stats.test_1samp(scores, 70)
+#q4_tstat, p_val = stats.ttest_1samp(scores, 70)
 #print(q4_tstat, p_val)
 
 #Q5 Re-run the test from Q1 as a one-tailed test to check whether group_a scores are less than group_b scores. Print the resulting p-value. Use the alternative parameter.
 
-#p_value = stats.ttest_ind(group_a, group_b, alternative="less")
-#print(p_value)
+#result = stats.ttest_ind(group_a, group_b, alternative="less")
+#print(result.pvalue)
 
-#Q6 Write a plain-language conclusion for the result of Q1 (do not just say "reject the null hypothesis"). Format it as a print() statement. Your conclusion should mention the direction of the difference and whether it is likely due to chance.
+#Q6 
 
-"""
-print("The difference in average scores is unlikely due to random chance. ")
-"""
+print(f"Group A mean: {np.mean(group_a):.2f}, Group B mean: {np.mean(group_b):.2f}")
+print(f"t-statistic: {t_stat:.4f}, p-value: {p_val:.6f}")
+print("Group B scored higher than Group A on average. This suggests there is a real difference between the 2 groups.")
+
 
 #---------------------------- Correlation Review -----------------------------
 
@@ -402,7 +398,7 @@ plt.show()
 arr = np.array([12.0, 15.0, np.nan, 14.0, 10.0, np.nan, 18.0, 14.0, 16.0, 22.0, np.nan, 13.0])
 
 def create_series(arr):
-    values = pd.Series(arr)
+    values = pd.Series(arr, name="values")
     return values
 
 def clean_data(series):
@@ -422,23 +418,9 @@ def summarize_data(series):
 def data_pipeline(arr):
     values = create_series(arr)
     clean_data = clean_data(values)
-    summary = summarize_data(values)
+    summary = summarize_data(clean_data)
     return summary
 
 
 print(data_pipeline(arr))
-
-"""
-Implement the following three functions and then connect them in a data_pipeline() function.
-
-create_series(arr) : takes a NumPy array and returns a pandas Series with the name "values".
-clean_data(series) : takes the Series, removes any NaN values using .dropna(), and returns the cleaned Series.
-summarize_data(series) -- takes the cleaned Series and returns a dictionary with four keys: "mean", "median", "std", and "mode". For mode, use series.mode()[0] to get a single value.
-data_pipeline(arr) -- calls the three functions above in sequence and returns the summary dictionary.
-Call data_pipeline(arr) and print each key and its value from the result.
-
-This is the last answer to put in warmups_01.py. Congrats!!!
-
-The next question will be in prefect_warmup.py, but will implement the same functionality using Prefect instead of plain Python.
-"""
 
