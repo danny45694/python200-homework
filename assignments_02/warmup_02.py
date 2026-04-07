@@ -103,14 +103,14 @@ plt.show()
 
 #Directory check and file creation functions
 
-
+#Check if outputs folder exists and create it if false
 def create_check_directory():
     output_dir = "outputs"
     if not os.path.isdir(output_dir):
         os.makedirs(output_dir)
     return output_dir
 
-#recreate function to save plot to outputs folder
+#function to save plot to outputs folder
 def output_file(filename):
     output_dir = create_check_directory()
     path = os.path.join(output_dir, filename)
@@ -130,14 +130,15 @@ def question1():
     plt.title("Medical Cost vs Age")
     output_file("cost_vs_age.png")
     
-
-# question1()
+#Used to run the function and save file to output folder.
+#question1()
 
 
 #Q2
 
 
 age = age.reshape(-1, 1)
+
 #after reshape
 X_train, X_test, Y_train, Y_test = train_test_split(
     age, cost, test_size=0.2, random_state=42
@@ -206,5 +207,8 @@ plt.show()
 
 # This section will contain the comment for Q5 section.See question below
 
+
 # Add a comment: what does it mean when a point falls above the diagonal? What about below?
 
+
+# When a point falls above the diagonal, it means the actual y-value is higher than the predicted value. If it falls below, that means the y-value was less than the predicted value. 
