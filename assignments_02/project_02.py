@@ -46,9 +46,9 @@ def hist_distributions(dataframe):
 
     #Save to outputs folder
 
-    #output_file('g3_distribution.png')
+    output_file('g3_distribution.png')
 
-#hist_distributions(df["G3"])
+hist_distributions(df["G3"])
 
 
 #Task 2: Preprocess the Data
@@ -106,19 +106,19 @@ y_pred = model.predict(X_test)
 rmse = np.sqrt(mean_squared_error(Y_test, y_pred))
 r2 = r2_score(Y_test, y_pred)
 
+print("Task 4")
 print("Slope:", model.coef_[0])
 print("Intercept:", model.intercept_)
 
 print("RMSE:", rmse)
 print("R²:", r2)
 
-# Need to add a comment about what the slopes and RMSE tell me. Is R² better or worse than expected. 
+# Postive slope means y increases as x increases. Negative is when the y decreases as x increases. RSME quantifies the average magnitude of errors. A lower RSME means better fit and accuracy. Is R² better or worse than expected.
 
 #Task 5 : Build the Full Model
 
 
-feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup",
-                "internet", "sex", "freetime", "activities", "traveltime"]
+feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime"]
 
 df_clean = pd.DataFrame(feature_cols)
 X = df_clean[feature_cols].values
