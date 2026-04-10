@@ -37,7 +37,6 @@ def output_file(filename):
 
 
 def hist_distributions(dataframe):
-    plt.subplot(1,2,1)
 
     plt.hist(dataframe, bins=21)
     plt.title('Distribution of Final Math Grades')
