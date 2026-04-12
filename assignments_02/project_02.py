@@ -52,28 +52,28 @@ hist_distributions(df["G3"])
 
 #Task 2: Preprocess the Data
 
+#Filter out G3 rows first.
 df2 = df.drop(df[df["G3"] == 0].index)
 #print(df.shape, df2.shape)
 
 df2 = df2.replace({"yes": 1, "no": 0, "F": 0, "M": 1})
 
+fig, (ax1, ax2) = plt.subplots(1, 2)
+ax1.scatter(df["absences"], df["G3"])
+ax1.set_title("Before dropping absent student test scores.")
+
+ax2.scatter(df2["absences"], df2["G3"])
+ax2.set_title("After dropping absent student test scores.")
+
+plt.show()
 
 r, p = pearsonr(df['absences'], df['G3'])
 r2, p2 = pearsonr(df2['absences'], df2['G3'])
-#print("Correlation:", round(r, 2))
-#print("p-value:", round(p, 4))
+print("Correlation:", round(r, 2))
+print("p-value:", round(p, 4))
 
-#print('Correlation:', round(r2, 2))
-#print('p-value:', round(p, 4))
-
-#Create the scatter plots
-
-#plt.scatter(pearson, pearson2)
-#Add labels and a title
-#plt.show()
-
-#yes/no to 1/0
-#sex column to 0/1
+print('Correlation:', round(r2, 2))
+print('p-value:', round(p2, 4))
 
 #Task 3: Exploratory Data Analysis
 
@@ -93,6 +93,8 @@ print(sorted_mat)
 
 X1 = df2["failures"]
 Y1 = df2["G3"]
+
+
 
 X_train, X_test, Y_train, Y_test = train_test_split(
     X1, Y1, test_size=0.2, random_state=42
