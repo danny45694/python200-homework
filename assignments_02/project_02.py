@@ -1,4 +1,3 @@
-
 #Week 2 Project
 
 import os
@@ -14,7 +13,6 @@ from sklearn.metrics import mean_squared_error, r2_score
 
 
 file = "student_performance_math.csv"
-
 
 #Task 1
 df = pd.read_csv(file, sep = ";", )
@@ -32,8 +30,6 @@ def output_file(filename):
     path = os.path.join(output_dir, filename)
     plt.savefig(path)
     plt.show()
-
-
 
 
 def hist_distributions(dataframe):
@@ -75,11 +71,12 @@ print("p-value:", round(p, 4))
 print('Correlation:', round(r2, 2))
 print('p-value:', round(p2, 4))
 
+#Before filtering G3, absences had a correlation of 0, suggesting that there was no relationship between absences and G3 test scores. After filtering, correlation dropped to -0.21. A negative correlation suggests that absences have an somewhat adverse effect on test scores. The correlation is not strong but it plays a factor.
+
 #Task 3: Exploratory Data Analysis
 
 correlation_matrix = df2.corr(method='pearson')
 G3_comparison = correlation_matrix["G3"]
-
 
 sorted_mat = G3_comparison.sort_values()
 print(sorted_mat)
@@ -93,8 +90,6 @@ print(sorted_mat)
 
 X1 = df2["failures"]
 Y1 = df2["G3"]
-
-
 
 X_train, X_test, Y_train, Y_test = train_test_split(
     X1, Y1, test_size=0.2, random_state=42
@@ -114,10 +109,10 @@ print("Intercept:", model.intercept_)
 print("RMSE:", rmse)
 print("R²:", r2)
 
+
 # Postive slope means y increases as x increases. Negative is when the y decreases as x increases. RSME quantifies the average magnitude of errors. A lower RSME means better fit and accuracy. Is R² better or worse than expected.
 
 #Task 5 : Build the Full Model
-
 
 feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime"]
 
@@ -139,6 +134,8 @@ r2_train = r2_score(y_train, y_prediction)
 
 for name, coef in zip(feature_cols, model.coef_):
     print(f"{name:12s}: {coef:+.3f}")
+
+
 
 #Need to add a comment answering: If I deployed this model in production, which features would you keep and which would you drop? Justify your choices based on what you see in the numbers.
 
