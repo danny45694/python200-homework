@@ -83,6 +83,9 @@ print(sorted_mat)
 
 #seems the Fedu, Medu, age, and sex all have the strongest relationship with G3
 
+
+
+
 # Need to develop 2 charts. Will make a heatmap and hist chart showing distribution of scores.
 
 
