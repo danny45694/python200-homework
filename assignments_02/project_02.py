@@ -7,8 +7,6 @@ import numpy as np
 from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
-from sklearn.cluster import KMeans
-from sklearn.datasets import make_blobs
 from sklearn.metrics import mean_squared_error, r2_score
 
 
@@ -91,8 +89,8 @@ print(sorted_mat)
 
 #Task 4: Baseline Model
 
-X1 = df2["failures"]
-Y1 = df2["G3"]
+X1 = df2[["failures"]]
+Y1 = df2[["G3"]]
 
 X_train, X_test, Y_train, Y_test = train_test_split(
     X1, Y1, test_size=0.2, random_state=42
@@ -119,9 +117,11 @@ print("R²:", r2)
 
 feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime"]
 
-df_clean = pd.DataFrame(feature_cols)
+df_clean = df2.copy()
 X = df_clean[feature_cols].values
 y = df_clean["G3"].values
+
+
 
 x_train, x_test, y_train, y_test = train_test_split(
     X, y, test_size=0.2, random_state=42 
@@ -129,16 +129,15 @@ x_train, x_test, y_train, y_test = train_test_split(
 
 T5_model = LinearRegression()
 T5_model.fit(x_train, y_train)
-y_prediction = model.predict(x_test)
+y_train_prediction = T5_model.predict(x_train)
+y_test_prediction = T5_model.predict(x_test)
 
-t5_rmse = np.sqrt(mean_squared_error(y_test, y_prediction))
-r2_test = r2_score(y_test, y_prediction)
-r2_train = r2_score(y_train, y_prediction)
+t5_rmse = np.sqrt(mean_squared_error(y_test, y_test_prediction))
+r2_test = r2_score(y_train, y_train_prediction)
+r2_train = r2_score(y_test, y_test_prediction)
 
-for name, coef in zip(feature_cols, model.coef_):
+for name, coef in zip(feature_cols, T5_model.coef_):
     print(f"{name:12s}: {coef:+.3f}")
-
-
 
 #Need to add a comment answering: If I deployed this model in production, which features would you keep and which would you drop? Justify your choices based on what you see in the numbers.
 
