@@ -1,5 +1,4 @@
 #Week 2 Project
-
 import os
 import matplotlib.pyplot as plt
 import pandas as pd
@@ -8,7 +7,7 @@ from scipy.stats import pearsonr
 from sklearn.linear_model import LinearRegression
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import mean_squared_error, r2_score
-
+import seaborn as sns
 
 file = "student_performance_math.csv"
 
@@ -73,16 +72,24 @@ print('p-value:', round(p2, 4))
 
 #Task 3: Exploratory Data Analysis
 
-correlation_matrix = df2.corr(method='pearson')
+#Double bracket ensures 2D, which sns.heatmap needs
+correlation_matrix = df2.corr(method='pearson')[["G3"]]
 G3_comparison = correlation_matrix["G3"]
 
-sorted_mat = G3_comparison.sort_values()
+sorted_mat = G3_comparison.sort_values(by="G3", ascending=False)
 print(sorted_mat)
+
+
 
 #seems the Fedu, Medu, age, and sex all have the strongest relationship with G3
 
+#Use annot=True for values
+sns.heatmap(sorted_mat, annot=sorted_mat.rank(ascending=False), cmap='coolwarm', center=0)
+plt.title("Correlation Rank with G3")
+plt.show()
 
 
+sns.histplot(data=sorted_mat)
 
 # Need to develop 2 charts. Will make a heatmap and hist chart showing distribution of scores.
 
@@ -120,7 +127,6 @@ feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", 
 df_clean = df2.copy()
 X = df_clean[feature_cols].values
 y = df_clean["G3"].values
-
 
 
 x_train, x_test, y_train, y_test = train_test_split(
