@@ -134,7 +134,7 @@ print("R²:", r2)
 
 #Task 5 : Build the Full Model
 
-feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime"]
+feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime", "G1"]
 
 df_clean = df2.copy()
 X = df_clean[feature_cols].values
@@ -181,3 +181,4 @@ plt.title("Feature Coefficients — Full Model")
 plt.tight_layout()
 output_file("feature_coefficients.png")
 
+#A high correlation does not equal the root cause. This is definitely a useful model for identifying factors that affect a students performance. If educators wanted to intervene early, providing internet access and study time is the route to go. Educators are unable to control a students background such as family's education levels or economic standing. They are able to control internet and study time however. That also so happens to be a very good indicator (outside of G1) of studies performing well on their final G3 exam. 
