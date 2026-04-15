@@ -74,9 +74,8 @@ print('p-value:', round(p2, 4))
 
 #Double bracket ensures 2D, which sns.heatmap needs
 correlation_matrix = df2.corr(method='pearson')[["G3"]]
-G3_comparison = correlation_matrix["G3"]
 
-sorted_mat = G3_comparison.sort_values(by="G3", ascending=False)
+sorted_mat = correlation_matrix.sort_values(by="G3", ascending=False)
 print(sorted_mat)
 
 
@@ -84,12 +83,25 @@ print(sorted_mat)
 #seems the Fedu, Medu, age, and sex all have the strongest relationship with G3
 
 #Use annot=True for values
-sns.heatmap(sorted_mat, annot=sorted_mat.rank(ascending=False), cmap='coolwarm', center=0)
+sns.heatmap(df2, annot=df2.rank(ascending=False), cmap='coolwarm', center=0)
 plt.title("Correlation Rank with G3")
 plt.show()
 
 
-sns.histplot(data=sorted_mat)
+plt.figure(figsize=(10, 6))
+sns.barplot(
+    data=df2,
+    x="Medu",              
+    y="G3",                
+    hue="Fedu",            
+    palette="coolwarm",
+)
+plt.title("Parent effect on G3 Scores")
+plt.xlabel("Mom education level (Medu)")
+plt.ylabel("Mean G3 Score")
+plt.legend(title="Father's education level (Fedu)")
+plt.tight_layout()
+plt.show()
 
 # Need to develop 2 charts. Will make a heatmap and hist chart showing distribution of scores.
 
