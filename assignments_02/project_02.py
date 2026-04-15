@@ -83,7 +83,7 @@ print(sorted_mat)
 #seems the Fedu, Medu, age, and sex all have the strongest relationship with G3
 
 #Use annot=True for values
-sns.heatmap(df2, annot=df2.rank(ascending=False), cmap='coolwarm', center=0)
+sns.heatmap(sorted_mat, annot=sorted_mat.rank(ascending=False), cmap='coolwarm', center=0)
 plt.title("Correlation Rank with G3")
 plt.show()
 
@@ -151,8 +151,8 @@ y_train_prediction = T5_model.predict(x_train)
 y_test_prediction = T5_model.predict(x_test)
 
 t5_rmse = np.sqrt(mean_squared_error(y_test, y_test_prediction))
-r2_test = r2_score(y_train, y_train_prediction)
-r2_train = r2_score(y_test, y_test_prediction)
+r2_train = r2_score(y_train, y_train_prediction)
+r2_test = r2_score(y_test, y_test_prediction)
 
 for name, coef in zip(feature_cols, T5_model.coef_):
     print(f"{name:12s}: {coef:+.3f}")
@@ -161,5 +161,23 @@ for name, coef in zip(feature_cols, T5_model.coef_):
 
 #Task 6: Evaluate and Summarize
 
+plt.figure(figsize=(8, 5))
+plt.scatter(y_test, y_test_prediction, alpha=0.6, color="steelblue", edgecolors="k", linewidths=0.4)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2, label="Perfect Fit")
+plt.title("Actual vs Predicted G3 Scores (Full Model)")
+plt.xlabel("Actual G3")
+plt.ylabel("Predicted G3")
+plt.legend()
+plt.tight_layout()
+output_file("actual_vs_predicted.png")
 
+
+plt.figure(figsize=(10, 5))
+coef_df = pd.DataFrame({"Feature": feature_cols, "Coefficient": T5_model.coef_})
+coef_df = coef_df.sort_values("Coefficient", ascending=False)
+sns.barplot(data=coef_df, x="Coefficient", y="Feature", palette="coolwarm")
+plt.axvline(0, color="black", linewidth=0.8, linestyle="--")
+plt.title("Feature Coefficients — Full Model")
+plt.tight_layout()
+output_file("feature_coefficients.png")
 
