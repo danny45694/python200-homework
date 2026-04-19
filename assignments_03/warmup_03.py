@@ -151,5 +151,60 @@ Q1()
 
 
 #----------------------- Decision Trees ---------------------------
-Decision_Tree = DecisionTreeClassifier(max_depth=1)
-model.fit()
+
+"""
+Decision_Tree = DecisionTreeClassifier(max_depth=3, random_state=42)
+decision_fit = (X_train, Y_train)
+decision_prediction = Decision_Tree.predict(X_test)
+
+
+print("Accuracy:", accuracy_score(Y_test, decision_prediction))
+print(classification_report(Y_test, decision_prediction ))
+
+
+"""
+
+#Given that Decision Trees don't rely on distance calculations, would scaled vs unscaled data affect the result?
+
+
+#----------------Logistic Regression and Regularization------------
+
+
+
+
+
+# Train Logistic Regression Model with 1 feature
+
+logistic_regression = LogisticRegression(
+    C=0.01,
+    max_iter=1000,
+    solver='liblinear'
+)
+
+logistic_regression2 = LogisticRegression(
+    C=1.0,
+    max_iter=1000,
+    solver='liblinear'
+)
+
+logistic_regression3 = LogisticRegression(
+    C=100,
+    max_iter=1000,
+    solver='liblinear'
+)
+
+
+
+#np.abs(model.coef_).sum()
+
+#log_reg_1.fit(X1_train_scaled, y_train)
+
+
+#-------------------------------PCA--------------------------------
+
+digits = load_digits()
+X_digits = digits.data    # 1797 images, each flattened to 64 pixel values
+y_digits = digits.target  # digit labels 0-9
+images   = digits.images  # same data shaped as 8x8 images for plotting
+
+print(X_digits.shape, images.shape)
