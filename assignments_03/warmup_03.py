@@ -208,3 +208,13 @@ y_digits = digits.target  # digit labels 0-9
 images   = digits.images  # same data shaped as 8x8 images for plotting
 
 print(X_digits.shape, images.shape)
+
+model = modelClass()
+model.fit(X_data, y_data)
+y_predictions = model.predict(X_test)
+
+plt.plot(X_digits, cmap='gray_r')
+plt.plot()
+plt.legend()
+plt.xlabel
+output_file("sample_digits.png")
