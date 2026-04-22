@@ -207,14 +207,27 @@ X_digits = digits.data    # 1797 images, each flattened to 64 pixel values
 y_digits = digits.target  # digit labels 0-9
 images   = digits.images  # same data shaped as 8x8 images for plotting
 
-print(X_digits.shape, images.shape)
 
+print(y_digits)
+#Q1
+
+print(X_digits.shape, images.shape)
+"""
 model = modelClass()
 model.fit(X_data, y_data)
 y_predictions = model.predict(X_test)
 
-plt.plot(X_digits, cmap='gray_r')
-plt.plot()
-plt.legend()
-plt.xlabel
-output_file("sample_digits.png")
+
+for digit in range(10):
+    index = list(y_digits).index(digit)
+
+    plt.subplot(1,10, digit + 1)
+    plt.imshow(images[index], cmap='gray_r')
+    plt.title(digit)
+    plt.xlabel
+    output_file("sample_digits.png")
+
+pca = PCA(n_components=2)
+x_pca = pca.fit_transform(x_scaled)
+
+"""
