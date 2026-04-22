@@ -145,7 +145,7 @@ def Q1():
     plt.title("KNN Confusion Matrix (Iris)")
     output_file("knn_confusion_matrix.png")
 
-Q1()
+#Q1()
 
 # This model is able to classify the data well overall. However, using prediction from Q1 shows perfect predictions. Using the scaled data from Q2, it begins to misclassify the Virginica and Versicolor flowers. AI is telling me this is because the rescales the Sepal Width, which overlaps a lot in different species. Rescaling in this case added noise. ??
 
@@ -207,17 +207,11 @@ X_digits = digits.data    # 1797 images, each flattened to 64 pixel values
 y_digits = digits.target  # digit labels 0-9
 images   = digits.images  # same data shaped as 8x8 images for plotting
 
-
-print(y_digits)
 #Q1
 
 print(X_digits.shape, images.shape)
+
 """
-model = modelClass()
-model.fit(X_data, y_data)
-y_predictions = model.predict(X_test)
-
-
 for digit in range(10):
     index = list(y_digits).index(digit)
 
@@ -226,8 +220,46 @@ for digit in range(10):
     plt.title(digit)
     plt.xlabel
     output_file("sample_digits.png")
+"""
 
-pca = PCA(n_components=2)
-x_pca = pca.fit_transform(x_scaled)
+#Q2
 
+
+pca = PCA(svd_solver='randomized', random_state=0)
+pca.fit(X_digits)
+
+scores = pca.transform(X_digits)
+
+
+
+
+components = pca.components_
+
+f, axes = plt.subplots(2,2)
+axes = axes.ravel()
+
+#Sample code from the lesson
+
+axes[2].plot(scores[:,0], color='grey', zorder=1 )
+axes[2].set_title('Component 1 Score')
+axes[2].scatter(frame_indices, scores[frame_indices, 0], s=15, color='black', zorder=3)
+# for frame_ind in frame_indices:
+#     axes[2].axvline(frame_ind, color="black", linewidth=0.5)
+axes[2].axhline(color='k', linewidth=0.5)
+axes[2].set_xlabel('Frame')
+axes[2].set_ylabel('Score')
+
+
+
+"""
+model = PCA()
+model.fit(X_digits, y_data)
+y_predictions = model.predict(X_test)
+"""
+
+
+"""
+fig, axes = plt.subplots(1,10, figsize=(8, 4))
+for k, ax in enumerate(axes):
+    ax.imshow(components[k].reshape(num_rows, num_cols), cmap='gray')
 """
