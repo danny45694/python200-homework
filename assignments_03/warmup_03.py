@@ -209,7 +209,7 @@ images   = digits.images  # same data shaped as 8x8 images for plotting
 
 #Q1
 
-print(X_digits.shape, images.shape)
+#print(X_digits.shape, images.shape)
 
 """
 for digit in range(10):
@@ -224,21 +224,18 @@ for digit in range(10):
 
 #Q2
 
-#Scaling is crucial for PCA
-
-scaler = StandardScaler()
-x_scaled = scaler.fit_transform(X_digits)
 
 pca = PCA()
-pca.fit(x_scaled)
-
+pca_fit = pca.fit(X_digits)
 scores = pca.transform(X_digits)
+
 scatter = plt.scatter(scores[:, 0], scores[:, 1], c=y_digits, cmap='tab10', s=10) # c = color array
 plt.colorbar(scatter, label="Digit")
 plt.savefig('outputs/pca_2d_projection.png')
+plt.show()
 
 #Do same-digit images tend to cluster together in this 2D space? Provide answer
-
+"""
 
 #Q3
 
@@ -251,10 +248,23 @@ plt.savefit('outputs/pca_variance_explained.png')
 #Q4
 
 def reconstruct_digit(sample_idx, scores, pca, n_components):
-    """Reconstruct one digit using the first n_components principal components."""
+    Reconstruct one digit using the first n_components principal components.
     reconstruction = pca.mean_.copy()
     for i in range(n_components):
         reconstruction = reconstruction + scores[sample_idx, i] * pca.components_[i]
     return reconstruction.reshape(8, 8)
 
 components = pca.components_
+
+# Use the function below to generate PCA question 4
+#reconstruct_digit(samples_idx, scores,pca, n_components)
+
+#scores = pca.transform(X_digits)
+
+fig, axes = plt.subplots(1, 2, figsize=(8,4))
+for k, ax in enumerate(axes):
+    ax.imshow(components[k].reshape(num_rows, num_cols), cmap='gray')
+    ax.set_title(f"PC{k+1}")
+    ax.axis('off')
+plt.show()
+"""
