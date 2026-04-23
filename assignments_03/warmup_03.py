@@ -224,42 +224,37 @@ for digit in range(10):
 
 #Q2
 
+#Scaling is crucial for PCA
 
-pca = PCA(svd_solver='randomized', random_state=0)
-pca.fit(X_digits)
+scaler = StandardScaler()
+x_scaled = scaler.fit_transform(X_digits)
+
+pca = PCA()
+pca.fit(x_scaled)
 
 scores = pca.transform(X_digits)
+scatter = plt.scatter(scores[:, 0], scores[:, 1], c=y_digits, cmap='tab10', s=10) # c = color array
+plt.colorbar(scatter, label="Digit")
+plt.savefig('outputs/pca_2d_projection.png')
+
+#Do same-digit images tend to cluster together in this 2D space? Provide answer
 
 
+#Q3
 
+cumulative_variances = np.cumsum(pca.explained_variance_ratio_)
+plt.savefit('outputs/pca_variance_explained.png')
+
+#Approximately how many components do you need to explain 80% of the variance? Provide an answer
+
+
+#Q4
+
+def reconstruct_digit(sample_idx, scores, pca, n_components):
+    """Reconstruct one digit using the first n_components principal components."""
+    reconstruction = pca.mean_.copy()
+    for i in range(n_components):
+        reconstruction = reconstruction + scores[sample_idx, i] * pca.components_[i]
+    return reconstruction.reshape(8, 8)
 
 components = pca.components_
-
-f, axes = plt.subplots(2,2)
-axes = axes.ravel()
-
-#Sample code from the lesson
-
-axes[2].plot(scores[:,0], color='grey', zorder=1 )
-axes[2].set_title('Component 1 Score')
-axes[2].scatter(frame_indices, scores[frame_indices, 0], s=15, color='black', zorder=3)
-# for frame_ind in frame_indices:
-#     axes[2].axvline(frame_ind, color="black", linewidth=0.5)
-axes[2].axhline(color='k', linewidth=0.5)
-axes[2].set_xlabel('Frame')
-axes[2].set_ylabel('Score')
-
-
-
-"""
-model = PCA()
-model.fit(X_digits, y_data)
-y_predictions = model.predict(X_test)
-"""
-
-
-"""
-fig, axes = plt.subplots(1,10, figsize=(8, 4))
-for k, ax in enumerate(axes):
-    ax.imshow(components[k].reshape(num_rows, num_cols), cmap='gray')
-"""
