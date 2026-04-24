@@ -268,7 +268,8 @@ components = pca.components_
 
 #scores = pca.transform(X_digits)
 
-fig, axes = plt.subplots(1, 2, figsize=(8,4))
+fig, axes = plt.subplots(5, 5)
+reconstruction = reconstruct_digit()
 for k, ax in enumerate(axes):
     ax.imshow(components[k].reshape(num_rows, num_cols), cmap='gray')
     ax.set_title(f"PC{k+1}")
