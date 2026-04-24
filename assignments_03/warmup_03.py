@@ -232,23 +232,30 @@ scores = pca.transform(X_digits)
 scatter = plt.scatter(scores[:, 0], scores[:, 1], c=y_digits, cmap='tab10', s=10) # c = color array
 plt.colorbar(scatter, label="Digit")
 plt.savefig('outputs/pca_2d_projection.png')
-plt.show()
+#plt.show()
 
-#Do same-digit images tend to cluster together in this 2D space? Provide answer
-"""
+#Yes they do. Images tend to cluster together in the same area. Some have values that overlap with other images but it tends to have a clear section for the most part. 
+
 
 #Q3
 
-cumulative_variances = np.cumsum(pca.explained_variance_ratio_)
-plt.savefit('outputs/pca_variance_explained.png')
+cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
 
-#Approximately how many components do you need to explain 80% of the variance? Provide an answer
+plt.figure()
+plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance)
+plt.xlabel("Number of Principal Components")
+plt.ylabel("Cumulative Explained Variance")
+plt.title("PCA Cumulative Explained Variance")
+plt.savefig('outputs/pca_variance_explained.png')
+plt.show()
+
+#We need around 20 components to explain 80% of the variance
 
 
 #Q4
 
 def reconstruct_digit(sample_idx, scores, pca, n_components):
-    Reconstruct one digit using the first n_components principal components.
+    #Reconstruct one digit using the first n_components principal components.
     reconstruction = pca.mean_.copy()
     for i in range(n_components):
         reconstruction = reconstruction + scores[sample_idx, i] * pca.components_[i]
@@ -267,4 +274,3 @@ for k, ax in enumerate(axes):
     ax.set_title(f"PC{k+1}")
     ax.axis('off')
 plt.show()
-"""
