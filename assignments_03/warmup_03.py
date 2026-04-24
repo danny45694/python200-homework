@@ -164,14 +164,17 @@ print(classification_report(Y_test, decision_prediction ))
 
 """
 
-#Given that Decision Trees don't rely on distance calculations, would scaled vs unscaled data affect the result?
+# Distance-related algorithms have no impact on the accuracy or structure of decision trees. So answer is no.
 
 
 #----------------Logistic Regression and Regularization------------
 
+"""
+Global variables. Brought here for reference.
 
-
-
+X_train_scaled = scaler.fit_transform(X_train) # learns mean and std from training
+X_test_scaled = scaler.transform(X_test) # applies the same scaling to test
+"""
 
 # Train Logistic Regression Model with 1 feature
 
@@ -194,6 +197,17 @@ logistic_regression3 = LogisticRegression(
 )
 
 
+#Throwing error. Line 203. Logistic Regression object has no attribute 'coef'. Need to fit the models so the coef prints.
+logistic_regression.fit()
+
+print(logistic_regression.C)
+print(logistic_regression2.C)
+print(logistic_regression3.C)
+
+print(logistic_regression.coef_)
+print(logistic_regression2.coef_)
+print(logistic_regression3.coef_)
+
 
 #np.abs(model.coef_).sum()
 
@@ -201,7 +215,7 @@ logistic_regression3 = LogisticRegression(
 
 
 #-------------------------------PCA--------------------------------
-
+"""
 digits = load_digits()
 X_digits = digits.data    # 1797 images, each flattened to 64 pixel values
 y_digits = digits.target  # digit labels 0-9
@@ -247,7 +261,7 @@ plt.xlabel("Number of Principal Components")
 plt.ylabel("Cumulative Explained Variance")
 plt.title("PCA Cumulative Explained Variance")
 plt.savefig('outputs/pca_variance_explained.png')
-plt.show()
+#plt.show()
 
 #We need around 20 components to explain 80% of the variance
 
@@ -269,9 +283,25 @@ components = pca.components_
 #scores = pca.transform(X_digits)
 
 fig, axes = plt.subplots(5, 5)
-reconstruction = reconstruct_digit()
-for k, ax in enumerate(axes):
-    ax.imshow(components[k].reshape(num_rows, num_cols), cmap='gray')
-    ax.set_title(f"PC{k+1}")
-    ax.axis('off')
+for column in range(5):
+    axes[0, column].imshow(images[column], cmap="gray_r")
+    axes[0, column].set_title(f"Digit {y_digits[column]}")
+    axes[0, column].axis("off")
+
+axes[0, 0].set_ylabel("Original")
+
+n_values = [2, 5, 15, 40]
+for row, n in enumerate(n_values, start=1):
+    for column in range(5):
+        reconstructed = reconstruct_digit(column, scores, pca, n)
+        axes[row, column].imshow(reconstructed, cmap="gray_r")
+        axes[row, column].axis("off")
+
+    axes[row, 0].set_ylabel(f"n={n}")
+    plt.savefig("outputs/pca_reconstructions.png")
+
 plt.show()
+
+# At n = 15 is when the digits become recognizable. It definitely correlates to where the variance curve levels off.
+
+"""
