@@ -188,58 +188,13 @@ OneVsRestClassifier(LogisticRegression(C=100, max_iter=1000, solver="liblinear")
 
 
 
-model.fit(X_train_scaled, Y_train)
-total = np.abs(model.estimators_[0].coef_).sum() + \
-        np.abs(model.estimators_[1].coef_).sum() + \
-        np.abs(model.estimators_[2].coef_).sum()
+c_values = [0.01, 1.0, 100]
 
-
-
-
-logistic_regression = LogisticRegression(
-    C=0.01,
-    max_iter=1000,
-    solver='liblinear',
-    multi_class="ovr"
-)
-
-
-
-logistic_regression2 = LogisticRegression(
-    C=1.0,
-    max_iter=1000,
-    solver='liblinear',
-    multi_class="ovr"
-)
-
-
-
-logistic_regression3 = LogisticRegression(
-    C=100,
-    max_iter=1000,
-    solver='liblinear',
-    multi_class="ovr"
-)
-
-
-#Throwing error. Line 203. Logistic Regression object has no attribute 'coef'. Need to fit the models so the coef prints.
-logistic_regression.fit(X_train_scaled, Y_train)
-logistic_regression2.fit(X_train_scaled, Y_train)
-logistic_regression3.fit(X_train_scaled, Y_train)
-
-print(logistic_regression.C)
-print(logistic_regression2.C)
-print(logistic_regression3.C)
-
-print(logistic_regression.coef_)
-print(logistic_regression2.coef_)
-print(logistic_regression3.coef_)
-
-
-
-#np.abs(model.coef_).sum()
-
-#log_reg_1.fit(X1_train_scaled, y_train)
+for c in c_values:
+    model = LogisticRegression(C=c, max_iter=1000, solver='liblinear')
+    model.fit(X_train_scaled, Y_train)
+    total = np.abs(model.coef_).sum()
+    print(f"C={c}: total coefficient magnitude = {total: .4f}")
 
 
 #-------------------------------PCA--------------------------------
