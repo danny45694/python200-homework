@@ -8,6 +8,7 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
+from sklearn.multiclass import OneVsRestClassifier
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -178,27 +179,53 @@ X_test_scaled = scaler.transform(X_test) # applies the same scaling to test
 
 # Train Logistic Regression Model with 1 feature
 
+
+OneVsRestClassifier(LogisticRegression(C=0.01, max_iter=1000, solver="liblinear")),
+OneVsRestClassifier(LogisticRegression(C=1.0, max_iter=1000, solver="liblinear")),
+OneVsRestClassifier(LogisticRegression(C=100, max_iter=1000, solver="liblinear"))
+
+
+
+
+
+model.fit(X_train_scaled, Y_train)
+total = np.abs(model.estimators_[0].coef_).sum() + \
+        np.abs(model.estimators_[1].coef_).sum() + \
+        np.abs(model.estimators_[2].coef_).sum()
+
+
+
+
 logistic_regression = LogisticRegression(
     C=0.01,
     max_iter=1000,
-    solver='liblinear'
+    solver='liblinear',
+    multi_class="ovr"
 )
+
+
 
 logistic_regression2 = LogisticRegression(
     C=1.0,
     max_iter=1000,
-    solver='liblinear'
+    solver='liblinear',
+    multi_class="ovr"
 )
+
+
 
 logistic_regression3 = LogisticRegression(
     C=100,
     max_iter=1000,
-    solver='liblinear'
+    solver='liblinear',
+    multi_class="ovr"
 )
 
 
 #Throwing error. Line 203. Logistic Regression object has no attribute 'coef'. Need to fit the models so the coef prints.
-logistic_regression.fit()
+logistic_regression.fit(X_train_scaled, Y_train)
+logistic_regression2.fit(X_train_scaled, Y_train)
+logistic_regression3.fit(X_train_scaled, Y_train)
 
 print(logistic_regression.C)
 print(logistic_regression2.C)
@@ -209,13 +236,13 @@ print(logistic_regression2.coef_)
 print(logistic_regression3.coef_)
 
 
+
 #np.abs(model.coef_).sum()
 
 #log_reg_1.fit(X1_train_scaled, y_train)
 
 
 #-------------------------------PCA--------------------------------
-"""
 digits = load_digits()
 X_digits = digits.data    # 1797 images, each flattened to 64 pixel values
 y_digits = digits.target  # digit labels 0-9
@@ -236,6 +263,8 @@ for digit in range(10):
     output_file("sample_digits.png")
 """
 
+
+"""
 #Q2
 
 
