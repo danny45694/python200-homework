@@ -143,7 +143,7 @@ plt.xlabel("Number of Principal Components")
 plt.ylabel("Cumulative Explained Variance")
 plt.title("PCA Cumulative Explained Variance")
 plt.savefig('outputs/UCI_variance.png')
-plt.show()
+#plt.show()
 
 #Once you have the num of N components. Use code below
 
@@ -153,7 +153,6 @@ n = 45
 
 # argmax can doublecheck your n component variable
 n_doublecheck = np.argmax(cumulative_variance >= 0.90) + 1
-print(n_doublecheck)
 X_train_pca = pca.transform(X_train_scaled)[:, :n]
 X_test_pca = pca.transform(X_test_scaled)[:, :n]
 
@@ -164,42 +163,58 @@ X_test_pca = pca.transform(X_test_scaled)[:, :n]
 knn_unscaled = KNeighborsClassifier(n_neighbors= 5)
 knn_unscaled.fit(X_train, y_train)
 predictions_unscaled = knn_unscaled.predict(X_test)
-#print("Accuracy:", accuracy_score(Y_test, predictions_unscaled))
-#print(classification_report(Y_test, predictions_unscaled ))
+print("Accuracy:", accuracy_score(y_test, predictions_unscaled))
+print(classification_report(y_test, predictions_unscaled ))
+
+
 
 #Scaled
 
+"""
 knn_scaled = KNeighborsClassifier(n_neighbors=5)
 knn_scaled.fit(X_train_scaled, y_train)
 prediction_scaled = knn_scaled.predict(X_test_scaled)
-#print("Accuracy:", accuracy_score(Y_test, predictions_scaled))
-#print(classification_report(Y_test, predictions_scaled ))
+print("Accuracy:", accuracy_score(y_test, prediction_scaled))
+print(classification_report(y_test, prediction_scaled ))
+"""
+
 
 #PCA-reduced data
+
 """
 knn_pca = KNeighborsClassifier(n_neighbors=5)
 knn_pca.fit(X_train_pca, y_train)
-predictions_pca = knn_pca(X_test_pca)
+predictions_pca = knn_pca.predict(X_test_pca)
+print("Accuracy:", accuracy_score(y_test, predictions_pca))
+print(classification_report(Y_test, predictions_pca))
+"""
 
-#print("Accuracy:", accuracy_score(Y_test, predictions_pca))
-#print(classification_report(Y_test, predictions_pca))
 
 #Decision-Tree
 
-max_depth = [3,5,10, 'None']
+"""
+
+max_depth = [3,5,10, None]
 
 for i in max_depth:
     Decision_Tree = DecisionTreeClassifier(max_depth=i, random_state=42)
-    decision_fit = (X_train, y_train)
+    decision_fit = Decision_Tree.fit(X_train, y_train)
     decision_prediction = Decision_Tree.predict(X_test)
-    importance = pd.Series(decision_prediction.feature_importances_, index=X_train.columns)
+    importance = pd.Series(Decision_Tree.feature_importances_, index=X_train.columns)
+    train_accuracy = accuracy_score(y_train, Decision_Tree.predict(X_train))
+    test_accuracy = accuracy_score(y_test, decision_prediction)
     print(importance.nlargest(10))
+    print(f"max_depth={i}: train={train_acc:.3f} test={test_acc:.3f}")
+
+
 
 print("Accuracy:", accuracy_score(y_test, decision_prediction))
 print(classification_report(y_test, decision_prediction ))
 """
-#Random Forest Classifer
 
+
+#Random Forest Classifer
+"""
 rf = RandomForestClassifier(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 importances = pd.Series(rf.feature_importances_,index=X_train.columns)
@@ -224,4 +239,19 @@ model2.fit(X_train_pca, y_train)
 total2 = np.abs(model2.coef_)
 print(total2)
 
+"""
 
+
+#Task 4
+
+"""
+#Confusion matrix for the best performing classifier
+cm = confusion_matrix(y_test, predictions)
+disp = ConfusionMatrixDisplay(
+    confusion_matrix=cm,
+    display_labels=iris.target_names
+)
+disp.plot()
+plt.title("KNN Confusion Matrix (Iris)")
+output_file("knn_confusion_matrix.png")}
+"""
