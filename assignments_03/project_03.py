@@ -20,7 +20,8 @@ from sklearn.metrics import (
     f1_score,
     classification_report
 )
-
+from sklearn.pipeline import Pipeline
+from sklearn.metrics import ConfusionMatrixDisplay
 
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
@@ -149,7 +150,7 @@ plt.savefig('outputs/UCI_variance.png')
 
 #Looks like number of N components that accounts for 90% is 45.
 
-n = 45
+n = 43
 
 # argmax can doublecheck your n component variable
 n_doublecheck = np.argmax(cumulative_variance >= 0.90) + 1
@@ -163,6 +164,7 @@ X_test_pca = pca.transform(X_test_scaled)[:, :n]
 knn_unscaled = KNeighborsClassifier(n_neighbors= 5)
 knn_unscaled.fit(X_train, y_train)
 predictions_unscaled = knn_unscaled.predict(X_test)
+print("knn unscaled")
 print("Accuracy:", accuracy_score(y_test, predictions_unscaled))
 print(classification_report(y_test, predictions_unscaled ))
 
@@ -170,31 +172,34 @@ print(classification_report(y_test, predictions_unscaled ))
 
 #Scaled
 
-"""
+
 knn_scaled = KNeighborsClassifier(n_neighbors=5)
 knn_scaled.fit(X_train_scaled, y_train)
 prediction_scaled = knn_scaled.predict(X_test_scaled)
+print('Knn Scaled:')
 print("Accuracy:", accuracy_score(y_test, prediction_scaled))
 print(classification_report(y_test, prediction_scaled ))
-"""
+
 
 
 #PCA-reduced data
 
-"""
+
 knn_pca = KNeighborsClassifier(n_neighbors=5)
 knn_pca.fit(X_train_pca, y_train)
 predictions_pca = knn_pca.predict(X_test_pca)
+print("KNN PCA")
 print("Accuracy:", accuracy_score(y_test, predictions_pca))
-print(classification_report(Y_test, predictions_pca))
-"""
+print(classification_report(y_test, predictions_pca))
+
 
 
 #Decision-Tree
 
-"""
-
 max_depth = [3,5,10, None]
+
+
+print('Decision Tree')
 
 for i in max_depth:
     Decision_Tree = DecisionTreeClassifier(max_depth=i, random_state=42)
@@ -204,17 +209,17 @@ for i in max_depth:
     train_accuracy = accuracy_score(y_train, Decision_Tree.predict(X_train))
     test_accuracy = accuracy_score(y_test, decision_prediction)
     print(importance.nlargest(10))
-    print(f"max_depth={i}: train={train_acc:.3f} test={test_acc:.3f}")
+    print(f"max_depth={i}: train={train_accuracy:.3f} test={test_accuracy:.3f}")
 
 
 
 print("Accuracy:", accuracy_score(y_test, decision_prediction))
 print(classification_report(y_test, decision_prediction ))
-"""
+
 
 
 #Random Forest Classifer
-"""
+
 rf = RandomForestClassifier(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
 importances = pd.Series(rf.feature_importances_,index=X_train.columns)
@@ -229,6 +234,7 @@ plt.show()
 
 #Logistic Regression
 
+print('Logistic Regression')
 model = LogisticRegression(C=1.0, max_iter=1000, solver='liblinear')
 model.fit(X_train_scaled, y_train)
 total = np.abs(model.coef_).sum()
@@ -239,19 +245,53 @@ model2.fit(X_train_pca, y_train)
 total2 = np.abs(model2.coef_)
 print(total2)
 
-"""
+
 
 
 #Task 4
 
-"""
-#Confusion matrix for the best performing classifier
-cm = confusion_matrix(y_test, predictions)
-disp = ConfusionMatrixDisplay(
-    confusion_matrix=cm,
-    display_labels=iris.target_names
-)
+models = {
+    "KNN Unscaled": (knn_unscaled, X_train),
+    "KNN Scaled": (knn_scaled, X_train_scaled),
+    "KNN PCA": (knn_pca, X_train_pca),
+    "Decision Tree": (Decision_Tree, X_train),
+    "Random Forest": (rf, X_train),
+    "Logistic Regression Scaled": (model, X_train_scaled),
+    "Logistic Regression PCA": (model2, X_train_pca),
+}
+
+for name, (score, X) in models.items():
+    scores = cross_val_score(score, X, y_train, cv=5)
+    print(f"{name}: mean={scores.mean():.3f}  std={scores.std():.3f}")
+
+
+# Task 5 - Pipelines
+
+rf_pipeline = Pipeline([
+    ("classifier", RandomForestClassifier(n_estimators=100, random_state=42))
+])
+
+rf_pipeline.fit(X_train, y_train)
+rf_preds = rf_pipeline.predict(X_test)
+print(classification_report(y_test, rf_preds))
+
+# (Logistic Regression with scaling)
+pipeline1 = Pipeline([
+    ("scaler", StandardScaler()),
+    ("pca", PCA(n_components=43)),
+    ("classifier", LogisticRegression(C=1.0, max_iter=1000, solver='liblinear'))
+])
+
+pipeline1.fit(X_train, y_train)
+logistic_preds = pipeline1.predict(X_test)
+print("Logistic Regression Pipeline:")
+print(classification_report(y_test, logistic_preds))
+
+# Confusion matrix for best model (Random Forest)
+cm = confusion_matrix(y_test, rf_preds)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['Ham', 'Spam'])
 disp.plot()
-plt.title("KNN Confusion Matrix (Iris)")
-output_file("knn_confusion_matrix.png")}
-"""
+plt.title("Random Forest Confusion Matrix")
+plt.tight_layout()
+plt.savefig('outputs/best_model_confusion_matrix.png')
+plt.show()
