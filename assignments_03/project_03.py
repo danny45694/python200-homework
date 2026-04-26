@@ -164,18 +164,25 @@ X_test_pca = pca.transform(X_test_scaled)[:, :n]
 knn_unscaled = KNeighborsClassifier(n_neighbors= 5)
 knn_unscaled.fit(X_train, y_train)
 predictions_unscaled = knn_unscaled.predict(X_test)
+#print("Accuracy:", accuracy_score(Y_test, predictions_unscaled))
+#print(classification_report(Y_test, predictions_unscaled ))
 
 #Scaled
 
 knn_scaled = KNeighborsClassifier(n_neighbors=5)
 knn_scaled.fit(X_train_scaled, y_train)
 prediction_scaled = knn_scaled.predict(X_test_scaled)
+#print("Accuracy:", accuracy_score(Y_test, predictions_scaled))
+#print(classification_report(Y_test, predictions_scaled ))
 
 #PCA-reduced data
-
+"""
 knn_pca = KNeighborsClassifier(n_neighbors=5)
 knn_pca.fit(X_train_pca, y_train)
 predictions_pca = knn_pca(X_test_pca)
+
+#print("Accuracy:", accuracy_score(Y_test, predictions_pca))
+#print(classification_report(Y_test, predictions_pca))
 
 #Decision-Tree
 
@@ -185,15 +192,25 @@ for i in max_depth:
     Decision_Tree = DecisionTreeClassifier(max_depth=i, random_state=42)
     decision_fit = (X_train, y_train)
     decision_prediction = Decision_Tree.predict(X_test)
+    importance = pd.Series(decision_prediction.feature_importances_, index=X_train.columns)
+    print(importance.nlargest(10))
 
 print("Accuracy:", accuracy_score(y_test, decision_prediction))
 print(classification_report(y_test, decision_prediction ))
-
+"""
 #Random Forest Classifer
 
 rf = RandomForestClassifier(n_estimators=100, random_state=42)
 rf.fit(X_train, y_train)
+importances = pd.Series(rf.feature_importances_,index=X_train.columns)
 #Create a bar chart of the Random Forest importance to (outputs/feature_importances.png)
+
+importances.nlargest(10).plot(kind='barh')
+plt.title("Top 10 Random Forest Feature Importances")
+plt.tight_layout()
+plt.savefig('outputs/feature_importances.png')
+plt.show()
+
 
 #Logistic Regression
 
