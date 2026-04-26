@@ -8,7 +8,6 @@ from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
 from sklearn.tree import DecisionTreeClassifier
 from sklearn.linear_model import LogisticRegression
-from sklearn.multiclass import OneVsRestClassifier
 from sklearn.metrics import (
     accuracy_score,
     classification_report,
@@ -178,14 +177,6 @@ X_test_scaled = scaler.transform(X_test) # applies the same scaling to test
 """
 
 # Train Logistic Regression Model with 1 feature
-
-
-OneVsRestClassifier(LogisticRegression(C=0.01, max_iter=1000, solver="liblinear")),
-OneVsRestClassifier(LogisticRegression(C=1.0, max_iter=1000, solver="liblinear")),
-OneVsRestClassifier(LogisticRegression(C=100, max_iter=1000, solver="liblinear"))
-
-
-
 
 
 c_values = [0.01, 1.0, 100]

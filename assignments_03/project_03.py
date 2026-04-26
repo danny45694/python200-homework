@@ -4,10 +4,13 @@ import pandas as pd
 import matplotlib.pyplot as plt
 import requests
 from io import BytesIO
-
-from sklearn.linear_model import LogisticRegression
-from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.preprocessing import StandardScaler
+from sklearn.decomposition import PCA
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.inspection import DecisionBoundaryDisplay
 from sklearn.metrics import (
     confusion_matrix,
     accuracy_score,
@@ -16,7 +19,8 @@ from sklearn.metrics import (
     f1_score,
     classification_report
 )
-from sklearn.inspection import DecisionBoundaryDisplay
+
+
 
 warnings.filterwarnings("ignore", category=RuntimeWarning)
 
@@ -90,7 +94,7 @@ df.columns = COLUMN_NAMES
 #print(df.head())
 
 features = ['word_freq_free', 'char_freq_!', 'capital_run_length_total']
-
+"""
 for feature in features:
     spam = df[df['spam_label'] == 1][feature]
     ham = df[df['spam_label'] == 0][feature]
@@ -101,9 +105,56 @@ for feature in features:
     plt.ylabel(feature)
     plt.savefig(f'outputs/{feature}_boxplot.png')
     plt.show()
-
+"""
 # The differences between classes are more subtle. Emails using the word "free" are more likely to be spam. The emails attempt to entice the reader into taking action with the promise of no cost. 
+
+#Need to double check comment here. Not sure if I understood question correctly.
 
 
 # Task 2
 
+
+X = df.drop(columns=['spam_label']) # Grab all 57 feature columns
+y = df['spam_label'] #Target
+
+#Train/Test split
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+
+#Scale
+
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train) # learns means and standard deviation from training
+X_test_scaled = scaler.transform(X_test)
+
+
+pca = PCA()
+pca.fit(X_train_scaled)
+
+#Cumulative_variance - tells how many components will account for a certain percentage of the data
+
+cumulative_variance = np.cumsum(pca.explained_variance_ratio_)
+
+plt.figure()
+plt.plot(range(1, len(cumulative_variance) + 1), cumulative_variance)
+plt.xlabel("Number of Principal Components")
+plt.ylabel("Cumulative Explained Variance")
+plt.title("PCA Cumulative Explained Variance")
+plt.savefig('outputs/UCI_variance.png')
+plt.show()
+
+#Once you have the num of N components. Use code below
+
+#Looks like number of N components that accounts for 90% is 45.
+
+n = 45
+
+# argmax can doublecheck your n component variable
+n_doublecheck = np.argmax(cumulative_variance >= 0.90) + 1
+print(n_doublecheck)
+X_train_pca = pca.transform(X_train_scaled)[:, :n]
+X_test_pca = pca.transform(X_test_scaled)[:, :n]
+
+
+# Task 3
