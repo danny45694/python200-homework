@@ -5,6 +5,7 @@ import matplotlib.pyplot as plt
 import requests
 from io import BytesIO
 from sklearn.model_selection import train_test_split, cross_val_score
+from sklearn.ensemble import RandomForestClassifier
 from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.neighbors import KNeighborsClassifier
@@ -158,3 +159,52 @@ X_test_pca = pca.transform(X_test_scaled)[:, :n]
 
 
 # Task 3
+
+#Unscaled data
+knn_unscaled = KNeighborsClassifier(n_neighbors= 5)
+knn_unscaled.fit(X_train, y_train)
+predictions_unscaled = knn_unscaled.predict(X_test)
+
+#Scaled
+
+knn_scaled = KNeighborsClassifier(n_neighbors=5)
+knn_scaled.fit(X_train_scaled, y_train)
+prediction_scaled = knn_scaled.predict(X_test_scaled)
+
+#PCA-reduced data
+
+knn_pca = KNeighborsClassifier(n_neighbors=5)
+knn_pca.fit(X_train_pca, y_train)
+predictions_pca = knn_pca(X_test_pca)
+
+#Decision-Tree
+
+max_depth = [3,5,10, 'None']
+
+for i in max_depth:
+    Decision_Tree = DecisionTreeClassifier(max_depth=i, random_state=42)
+    decision_fit = (X_train, y_train)
+    decision_prediction = Decision_Tree.predict(X_test)
+
+print("Accuracy:", accuracy_score(y_test, decision_prediction))
+print(classification_report(y_test, decision_prediction ))
+
+#Random Forest Classifer
+
+rf = RandomForestClassifier(n_estimators=100, random_state=42)
+rf.fit(X_train, y_train)
+#Create a bar chart of the Random Forest importance to (outputs/feature_importances.png)
+
+#Logistic Regression
+
+model = LogisticRegression(C=1.0, max_iter=1000, solver='liblinear')
+model.fit(X_train_scaled, y_train)
+total = np.abs(model.coef_).sum()
+print(total)
+
+model2 = LogisticRegression(C=1.0, max_iter=1000, solver ='liblinear')
+model2.fit(X_train_pca, y_train)
+total2 = np.abs(model2.coef_)
+print(total2)
+
+
