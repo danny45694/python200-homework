@@ -13,4 +13,3 @@ response = client.chat.completions.create(
 
 
 # ------------------------------- The Chat Completions API -----------------------
-
