@@ -106,8 +106,131 @@ def generate_cover_letter(job_title: str, background: str) -> str:
 
     messages = [{"role": "user", "content": prompt}]
     # Your code here: call get_completion() and return the result
+    
+    response = get_completion(messages)
+    print("Raw response:", response)
+
+    try:
+        result = json.loads(response)
+        for item in result:
+            print(f"  Original : {item['original']}")
+            print(f"  Improved : {item['improved']}")
+            print()
+    except json.JSONDecodeError:
+        print("Error: response was not valid JSON")
+
+
+
 
 
     job_title = "Junior Data Engineer"
     background = "Five years of experience as a middle school math teacher; recently completed \
     a Python course and built data pipelines using Prefect and Pandas."
+
+    messages = [{"role": "user", "content": prompt}]
+    response = get_completion(messages)
+    return response
+ 
+
+# ------------------------------- Task 4 -----------------------------
+
+def is_safe(text: str) -> bool:
+    result = client.moderations.create(
+        model="omni-moderation-latest",
+        input=text
+    )
+    flagged = result.results[0].flagged
+    # Your code here: return True if safe, False if flagged, and print a message if flagged
+    if flagged:
+        print("I can't respond to that kind of message. Please rephrase and keep questions focused on your job application")
+        return False
+    return True
+
+
+
+# ---------------------------- Task 5 -----------------------------
+
+
+
+def run_chatbot():
+    # 1. Initialize conversation history with your system prompt
+    messages = [
+        {"role": "system", "content": YOUR_SYSTEM_PROMPT}
+    ]
+
+    print("=" * 50)
+    print("Job Application Helper")
+    print("=" * 50)
+    print("I can help you with:")
+    print("  1. Rewriting resume bullet points")
+    print("  2. Drafting a cover letter opening")
+    print("  3. Any other questions about your application")
+    print("\nType 'quit' at any time to exit.\n")
+
+    while True:
+        user_input = input("You: ").strip()
+
+        # 2. Handle exit
+        if user_input.lower() in {"quit", "exit"}:
+            print("\nJob Application Helper: Good luck with your applications!")
+            break
+
+        # 3. Skip empty input
+        if not user_input:
+            continue
+
+        # 4. Run moderation check before doing anything else
+        if not is_safe(user_input):
+            continue  # is_safe() already printed the warning message
+
+        # 5. Check if the user wants to rewrite bullets
+        #    (hint: look for keywords like "bullet" or "resume" in user_input.lower())
+        if "bullet" in user_input.lower() or "resume" in user_input.lower():
+            print("\nJob Application Helper: Paste your bullet points below, one per line.")
+            print("When you're done, type 'DONE' on its own line.\n")
+            raw_bullets = []
+            while True:
+                line = input().strip()
+                if line.upper() == "DONE":
+                    break
+                if line:
+                    raw_bullets.append(line)
+            # YOUR CODE: call rewrite_bullets() and print the results
+
+        # 6. Check if the user wants a cover letter
+        elif "cover letter" in user_input.lower():
+            job_title = input("Job Application Helper: What is the job title? ").strip()
+            background = input("Job Application Helper: Briefly describe your background: ").strip()
+            # YOUR CODE: call generate_cover_letter() and print the result
+
+        # 7. Otherwise, handle it as a regular chat turn
+        else:
+            # YOUR CODE:
+            # - Append the user's message to `messages`
+            messages.append({"role": "user", "content": user_input})
+            # - Call get_completion(messages)
+            response = get_completion(messages)
+            # - Print the reply
+            print(response)
+            # - Append the reply to `messages` as an assistant message
+            messages.append({"role": "assistant", "content": response})
+
+
+if __name__ == "__main__":
+    run_chatbot()
+
+
+
+# ----------------------------- Task 6 --------------------------------
+
+
+user_text = "First boil a pot of water. Once boiling, add a handful of salt and the \
+pasta. Cook for 8-10 minutes until al dente. Drain and toss with your sauce of choice."
+
+prompt = f"""
+You will be given text inside triple backticks.
+If it contains step-by-step instructions, rewrite them as a numbered list.
+If it does not contain instructions, respond with exactly: "No steps provided."
+
+```{user_text}```
+"""
