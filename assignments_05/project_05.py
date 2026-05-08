@@ -234,3 +234,10 @@ If it does not contain instructions, respond with exactly: "No steps provided."
 
 ```{user_text}```
 """
+
+# The bot is dependant on the training data provided to it. If there is bias in the training data, the bot will carry that bias in it's output. It could very much favor certain aspects like communication styles, industries or cultural backgrounds.
+
+# The bot may inadvertedly return an output that is offensive or provide damaging misinformtion. A real employer reviewing the application may feel offended or see the candidate as unprofessional. It is critical to review the output of AI as AI cannot be held accountable.
+
+# One guardrail that could be implemented is moderation filters. Tell the AI not to provide misinformation, to ensure it respects cultural norms, and ensure to highlight any potentional problems with its output for the human to review.
+
