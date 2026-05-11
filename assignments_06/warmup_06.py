@@ -1,12 +1,16 @@
 from dotenv import load_dotenv
 import os
 
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.llms.openai import OpenAI
+
 if load_dotenv():
     print("API key loaded successfully.")
 else:
     print("Warning: could not load API key. Check your .env file.")
 
 
+api_key = os.getenv("OPENAI_API_KEY")
 
 # ----------------------------------- RAG Concepts --------------------------------------
 
@@ -94,7 +98,7 @@ def simple_keyword_retrieval(query, documents, verbose=True):
         return [("None found", "No relevant content.")]
     
 
-query = "What are your hours on the weekend?"
+#query = "What are your hours on the weekend?"
 
 documents = {
     "menu.txt": "We serve espresso, lattes, cappuccinos, and cold brew. Pastries include croissants and muffins baked fresh daily. Oat milk and almond milk are available.",
@@ -104,15 +108,19 @@ documents = {
 }
 
 
-simple_keyword_retrieval(query, documents, verbose=True)
+#simple_keyword_retrieval(query, documents, verbose=True)
 
 # Loyalty.txt was selected. The query is looking for 'your'.
 
 
 # Keyword Question 2
 
+"""
 query = "Do you have anything without caffeine?"
 simple_keyword_retrieval(query, documents, verbose=True)
+"""
+
+
 
 """
  No document was selected. It technically got it right. Source documents do not list anything without caffeine.
@@ -121,6 +129,8 @@ simple_keyword_retrieval(query, documents, verbose=True)
 
 # Keyword Question 3
 
+
+"""
 query = "How do I sign up for rewards?"
 
 # It will return nothing. There are no content matches
@@ -129,7 +139,7 @@ simple_keyword_retrieval(query, documents, verbose=True)
 
 # I was right. No keywords matches so the model returned nothing.
 
-
+"""
 
 # --------------------------------- Semantic RAG Concepts -----------------------------
 
@@ -169,5 +179,123 @@ simple_keyword_retrieval(query, documents, verbose=True)
 # --------------------------------- LlamaIndex -----------------------------------
 
 
+# Function for the following questions
+"""
+def question_query(questions):
+    for q in questions:
+        print(f"\nQ: {q}")
+        response = query_engine.query(q)
+        print("A:", response)
+        print_response_details(response)
 
-SimpleDirectoryReader("brightleaf_pdfs")
+def print_response_details():
+    for node_with_score in response.source_nodes:
+        print(f"Similarity Score: {node_with_score.score:.4f}")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:150]}...")
+        print("-" * 30)
+"""
+
+
+
+# LlamaIndex Question 1
+
+
+docs = SimpleDirectoryReader("brightleaf_pdfs").load_data()
+index = VectorStoreIndex.from_documents(docs)
+
+
+
+
+print(type(index._vector_store).__name__)
+
+"""
+query_engine = index.as_query_engine(similarity_top_k=3)
+
+questions = [
+    "What employee benefits does BrightLeaf offer?",
+    "What are BrightLeaf's security policies?",
+]
+
+for q in questions:
+    print(f"\nQ: {q}")
+    response = query_engine.query(q)
+    print("A:", response)
+
+    for node_with_score in response.source_nodes:
+        print(f"Node ID: {node_with_score.node.node_id}")
+        print(f"Similarity Score: {node_with_score.score:.4f}")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
+        print("-" * 30)
+
+        text = node_with_score.node.get_content()
+        clean_text = " ".join(text.split())
+
+        print(f"Similarity Score: {node_with_score.score:.4f}")
+        print(f"Text Snippet: {clean_text[:150]}...")
+
+        print(node_with_score.node.metadata)
+
+
+
+
+# Llamaindex Question 2
+
+
+"""
+
+
+n = [1, 5]
+
+for i in n:
+    index = VectorStoreIndex.from_documents(docs)
+    query_engine = index.as_query_engine(similarity_top_k=i)
+
+    for q in questions:
+        response = query_engine.query(q)
+        print("A:", response)
+        print(f"\nQ: {q}")
+
+    for node_with_score in response.source_nodes:
+        print(f"Node ID: {node_with_score.node.node_id}")
+        print(f"Similarity Score: {node_with_score.score:.4f}")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
+        print("-" * 30)
+
+        
+
+
+        
+"""
+
+
+
+# Llamaindex Question 3
+
+
+
+
+
+
+#Llamaindex Question 4
+
+from llama_index.core.evaluation import FaithfulnessEvaluator, RelevancyEvaluator
+
+llm = OpenAI(model="gpt-4o-mini", temperature=0.2)
+
+# Define evaluator
+faithfulness_evaluator = FaithfulnessEvaluator(llm=llm)
+relevancy_evaluator = RelevancyEvaluator(llm=llm)
+
+#Get response to query
+q = "What employee benefits does BrightLeaf offer?"
+response = query_engine.query(q)
+
+# Evaluate faithfulness and relevancy
+faithfulness_result = faithfulness_evaluator.evaluate_response(query=q, response=response)
+print("Faithfulness Evaluation: " + str(faithfulness_result.score))
+
+relevancy_result = relevancy_evaluator.evaluate_response(query=q, response=response)
+print("Relevancy Result: " + str(relevancy_result.score))
+
+
+"""
