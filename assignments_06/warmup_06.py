@@ -208,7 +208,7 @@ index = VectorStoreIndex.from_documents(docs)
 
 print(type(index._vector_store).__name__)
 
-"""
+
 query_engine = index.as_query_engine(similarity_top_k=3)
 
 questions = [
@@ -241,7 +241,7 @@ for q in questions:
 # Llamaindex Question 2
 
 
-"""
+
 
 
 n = [1, 5]
