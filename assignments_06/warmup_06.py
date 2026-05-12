@@ -222,18 +222,12 @@ for q in questions:
     print("A:", response)
 
     for node_with_score in response.source_nodes:
+        file_name = node_with_score.node.metadata.get("file_name")
+        print(f"Source Document: {file_name}")
         print(f"Node ID: {node_with_score.node.node_id}")
         print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
         print("-" * 30)
-
-        text = node_with_score.node.get_content()
-        clean_text = " ".join(text.split())
-
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {clean_text[:150]}...")
-
-        print(node_with_score.node.metadata)
 
 
 
