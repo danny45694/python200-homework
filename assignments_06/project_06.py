@@ -54,12 +54,13 @@ for q in questions:
         print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
         print("-" * 30)
 
-
+# The assistant sounds confident and self assured. None of the answers surprised me.
 
 # Step 5: Find a Failure
 
 questions = [
-    "How did Groundwork's wholesale program cause their hours on weekend to change?"
+    "What drink is good for diabetics?",
+    "Can I book Groundwork Coffee for a wedding with 150 guests, and how much would it cost?"
 ]
 
 for q in questions:
@@ -81,6 +82,13 @@ for q in questions:
         #text = node_with_score.node.get_content()
         #clean_text = " ".join(text.split())
 
+"""
+
+I asked the model 2 different questions. For the wedding question, if it offered pricing without evidence, it hallucinated. In my case, it answered correctly, asking the user to contact Groundwork directly.
+
+For the diabetes question, it suggested an americano. I looked up an americano and those are typically made without sugar. 
+
+"""
 
 # Step 6: Reflection
 
