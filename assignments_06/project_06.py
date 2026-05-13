@@ -93,21 +93,10 @@ For the diabetes question, it suggested an americano. I looked up an americano a
 # Step 6: Reflection
 
 """
-Step 6: Reflection
-Add a comment block at the end of project_06.py answering the following:
+1. Creating the LlamaIndex implementation took maybe 10 lines at most. It is very efficient and helpful using a framework.
 
-The lesson built semantic RAG manually — chunking, embedding, and indexing took many lines of code. How many lines did the equivalent LlamaIndex implementation take in your project? What does that tell you about the value of using a framework?
+2. In my current role as a procurement specialist, it would be very helpful in pulling price information from different invoices and providing me that cost information. In addition, I can set it up to alert me when there are funny charges like a recent HDPE surcharge we got. 
 
-You have now built a system that answers questions from real documents. Describe a different use case — not a coffee shop — where this approach would add genuine value to a business or organization.
-
-What is one failure mode that RAG cannot fully prevent, even when retrieval is working correctly?
-
-
-"""
-
-
-"""
-
-Step 6 comments here. 
+3. Hallucinations. It continues to be one of the biggest reasons human oversight is required for implementation and use of AI.
 
 """
