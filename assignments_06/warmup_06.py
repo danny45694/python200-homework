@@ -1,9 +1,6 @@
 from dotenv import load_dotenv
 import os
 
-from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
-from llama_index.llms.openai import OpenAI
-
 if load_dotenv():
     print("API key loaded successfully.")
 else:
@@ -170,11 +167,11 @@ simple_keyword_retrieval(query, documents, verbose=True)
 
 | Feature                    | Keyword RAG                       | Semantic RAG |
 |----------------------------|-----------------------------------|--------------|
-| What is compared?          | Exact word overlap                | ?            |
-| What is retrieved?         | Full document                     | ?            |
-| Can it handle synonyms?    | No                                | ?            |
-| Storage format             | Plain text dictionary             | ?            |
-| Relevance score            | Number of overlapping keywords    | ?            |
+| What is compared?          | Exact word overlap              | Word meaning   |
+| What is retrieved?         | Full document                   | Context chunks |
+| Can it handle synonyms?    | No                              | Yes            |
+| Storage format             | Plain text dictionary       |Multi-layer approach|
+| Relevance score            | Number of overlapping keywords |Cosign Similarity|
 
 
 
@@ -186,7 +183,7 @@ simple_keyword_retrieval(query, documents, verbose=True)
 # --------------------------------- LlamaIndex -----------------------------------
 
 
-# Function for the following questions
+
 """
 def question_query(questions):
     for q in questions:
@@ -204,13 +201,21 @@ def print_response_details():
 
 
 
+
 # LlamaIndex Question 1
+import llama_index.readers.file.pymupdf 
+import PyMuPDFReader
+from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
+from llama_index.llms.openai import OpenAI
 
+reader = SimpleDirectoryReader(
+    input_dir="brightleaf_pdfs",
+    file_extractor={".pdf": PyMuPDFReader()},
+)
 
-docs = SimpleDirectoryReader("brightleaf_pdfs").load_data()
+docs = reader.load_data()
+
 index = VectorStoreIndex.from_documents(docs)
-
-
 
 
 print(type(index._vector_store).__name__)
@@ -241,10 +246,6 @@ for q in questions:
 
 # Llamaindex Question 2
 
-
-
-
-
 n = [1, 5]
 
 for i in n:
@@ -263,8 +264,6 @@ for i in n:
         print("-" * 30)
 
         
-
-
         
 """
 
