@@ -19,43 +19,14 @@ assert docs_dir.exists(), f"Document directory not found: {docs_dir}"
 # Step 2: Load the Documents
 
 
-docs = SimpleDirectoryReader("groundwork_docs").load_data()
+docs = SimpleDirectoryReader("groundwork_docs", filename_as_id= True).load_data()
 index = VectorStoreIndex.from_documents(docs)
-print(docs)
-print(len(docs))
 
-
+print(docs[0])
 # Step 3: Build the Index and Query Engine
 
-"""
 query_engine = index.as_query_engine(similarity_top_k=3)
 print("Index built successfully. Ready for answer questions")
-
-"""
-
-"""
-for q in questions:
-    print(f"\nQ: {q}")
-    response = query_engine.query(q)
-    print("A:", response)
-
-    for node_with_score in response.source_nodes:
-        print(f"Node ID: {node_with_score.node.node_id}")
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
-        print("-" * 30)
-        
-
-
-        # Text Snippet is coming out as gibberish. Tried this to fix.
-        #text = node_with_score.node.get_content()
-        #clean_text = " ".join(text.split())
-
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {clean_text[:150]}...")
-
-        print(node_with_score.node.metadata)
-"""
 
 
 
@@ -76,18 +47,20 @@ for q in questions:
     
 
     for node_with_score in response.source_nodes:
+        file_name = node_with_score.node.metadata.get("file_name")
         print(f"Source Document: {file_name}")
         print(f"Node ID: {node_with_score.node.node_id}")
         print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
         print("-" * 30)
 
-
+# The assistant sounds confident and self assured. None of the answers surprised me.
 
 # Step 5: Find a Failure
 
 questions = [
-    "How did Groundwork's wholesale program cause their hours on weekend to change?"
+    "What drink is good for diabetics?",
+    "Can I book Groundwork Coffee for a wedding with 150 guests, and how much would it cost?"
 ]
 
 for q in questions:
@@ -96,9 +69,11 @@ for q in questions:
     print("A:", response)
 
     for node_with_score in response.source_nodes:
+        file_name = node_with_score.node.metadata.get("file_name")
+        print(f"Source Document: {file_name}")
         print(f"Node ID: {node_with_score.node.node_id}")
         print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
         print("-" * 30)
         
 
@@ -107,11 +82,13 @@ for q in questions:
         #text = node_with_score.node.get_content()
         #clean_text = " ".join(text.split())
 
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {clean_text[:150]}...")
+"""
 
-        print(node_with_score.node.metadata)
+I asked the model 2 different questions. For the wedding question, if it offered pricing without evidence, it hallucinated. In my case, it answered correctly, asking the user to contact Groundwork directly.
 
+For the diabetes question, it suggested an americano. I looked up an americano and those are typically made without sugar. 
+
+"""
 
 # Step 6: Reflection
 
