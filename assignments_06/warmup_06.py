@@ -18,8 +18,14 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 """
 
-A. RAG would be best for this situation. With RAG, 
+Scene A: 
+RAG would be best for this situation. With an ever changing database, RAG is much easier to implement and change each time. Fine-tuning is too expensive for something that will change in 3 months and prompt engineering will blow the context window.
 
+Scene B: 
+This would require fine-tuning. To achieve a certain voice, you need to provide the AI many examples of the kind of language and writing style it must possess.
+
+Scene C:
+Simple prompt engineering would work here. It is faster to paste the documents into the prompt than to setup code and implement RAG for it. We need not say more about fine-tuning.
 
 """
 
@@ -28,6 +34,7 @@ A. RAG would be best for this situation. With RAG,
 
 """
 
+AI hallucinations can have very drastic consequences. Because they produce output with so much confidence, it is easier for a user to take the output at face value vs doing their own research. One recent example is Delotte. They provided a report where the AI cited false citations. The Canadian government spent around $1.6 million on the report. No bueno
 
 """
 
