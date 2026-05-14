@@ -61,7 +61,7 @@ import string
 
 
 def simple_keyword_retrieval(query, documents, verbose=True):
-    """Keyword retrieval using token overlap scoring."""
+    #Keyword retrieval using token overlap scoring.
     stopwords = {
         "a", "an", "the", "and", "or", "in", "on", "of", "for", "to", "is",
         "are", "was", "were", "by", "with", "at", "from", "that", "this",
@@ -269,16 +269,27 @@ for i in [1, 5]:
 
 # Responses seem the same overall. The only difference is K=5 produced more technical detail in its output.
         
-"""
-
 
 
 # Llamaindex Question 3
 
 
+questions = [
+    "What is the motivation of paying brightleaf employees low wages if you really value their impact and cooperation?"
+]
 
+for q in questions:
+    print(f"\nQ: {q}")
+    response = query_engine.query(q)
+    print("A:", response)
 
-
+    for node_with_score in response.source_nodes:
+        file_name = node_with_score.node.metadata.get("file_name")
+        print(f"Source Document: {file_name}")
+        print(f"Node ID: {node_with_score.node.node_id}")
+        print(f"Similarity Score: {node_with_score.score:.4f}")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
+        print("-" * 30)
 
 #Llamaindex Question 4
 
@@ -302,4 +313,4 @@ relevancy_result = relevancy_evaluator.evaluate_response(query=q, response=respo
 print("Relevancy Result: " + str(relevancy_result.score))
 
 
-"""
+
