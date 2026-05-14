@@ -203,8 +203,8 @@ def print_response_details():
 
 
 # LlamaIndex Question 1
-import llama_index.readers.file.pymupdf 
-import PyMuPDFReader
+from llama_index.core import SimpleDirectoryReader
+from llama_index.readers.file import PyMuPDFReader
 from llama_index.core import SimpleDirectoryReader, VectorStoreIndex
 from llama_index.llms.openai import OpenAI
 
