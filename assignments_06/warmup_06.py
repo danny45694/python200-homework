@@ -241,29 +241,33 @@ for q in questions:
         print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
         print("-" * 30)
 
-
+# The retrieve chunks are relevant to the question asked.
+# The model sounds very confident and specific
+# I don't see anything unexpected.
 
 
 # Llamaindex Question 2
 
-n = [1, 5]
+index = VectorStoreIndex.from_documents(docs)
 
-for i in n:
-    index = VectorStoreIndex.from_documents(docs)
+for i in [1, 5]:
+    print(f"\n=== similarity_top_k={i} ===")
+
     query_engine = index.as_query_engine(similarity_top_k=i)
 
     for q in questions:
-        response = query_engine.query(q)
-        print("A:", response)
         print(f"\nQ: {q}")
 
-    for node_with_score in response.source_nodes:
-        print(f"Node ID: {node_with_score.node.node_id}")
-        print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
-        print("-" * 30)
+        response = query_engine.query(q)
+        print("A:", response)
 
-        
+        for node_with_score in response.source_nodes:
+            print(f"Node ID: {node_with_score.node.node_id}")
+            print(f"Similarity Score: {node_with_score.score:.4f}")
+            print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
+            print("-" * 30)
+
+# Responses seem the same overall. The only difference is K=5 produced more technical detail in its output.
         
 """
 
