@@ -291,6 +291,8 @@ for q in questions:
         print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
         print("-" * 30)
 
+# I kind of expected the AI to upsell the benefits provided by the company or the low-pay in lieu of advancement opportunities. Instead, the AI said it pays the employee fair wages.
+
 #Llamaindex Question 4
 
 from llama_index.core.evaluation import FaithfulnessEvaluator, RelevancyEvaluator
@@ -302,15 +304,24 @@ faithfulness_evaluator = FaithfulnessEvaluator(llm=llm)
 relevancy_evaluator = RelevancyEvaluator(llm=llm)
 
 #Get response to query
-q = "What employee benefits does BrightLeaf offer?"
-response = query_engine.query(q)
+queries = ["What employee benefits does BrightLeaf offer?",
+           "What impact does BrightLeaf have the economy and overall political climate?"]
+for q in queries:
+    response = query_engine.query(q)
 
-# Evaluate faithfulness and relevancy
-faithfulness_result = faithfulness_evaluator.evaluate_response(query=q, response=response)
-print("Faithfulness Evaluation: " + str(faithfulness_result.score))
+    # Evaluate faithfulness and relevancy
+    faithfulness_result = faithfulness_evaluator.evaluate_response(query=q, response=response)
+    print("Faithfulness Evaluation: " + str(faithfulness_result.score))
 
-relevancy_result = relevancy_evaluator.evaluate_response(query=q, response=response)
-print("Relevancy Result: " + str(relevancy_result.score))
+    relevancy_result = relevancy_evaluator.evaluate_response(query=q, response=response)
+    print("Relevancy Result: " + str(relevancy_result.score))
 
 
+#Faithfulness score of 1 means the AI referred the data almost completely, if not entirely, from the source material.
+
+# Relevancy measures how well an AI's response directly answers the user's specific question.
+
+# The scores did not change between the 2 queries. 
+
+# Uses a capable LLM to act as a judge the output of another AI application.
 
