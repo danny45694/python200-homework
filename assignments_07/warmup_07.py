@@ -22,11 +22,27 @@ tools = [
     {
         'type': 'function',
         'function': {
+            'name': 'get_current_time',
+            'description': 'Returns the current local time as a string.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+            },
+        },
+    }
+]
+print('Tools list defined with one tool: get_current_time')
+
+tools = [
+    {
+        'type': 'function',
+        'function': {
             'name': 'celsius_to_fahrenheit',
             'description': 'Converts a Celsius temperature to Fahrenheit and returns it as a string.',
             'parameters': {
-                'type': 'object',
-                'properties': {"number"},
+                'type': 'number',
+                'properties': {},
                 'required': [],
             },
         },
@@ -127,3 +143,7 @@ def run_agent(user_prompt: str) -> str:
 
 answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
 print(answer)
+
+#Q3
+
+#Support what tools? Weren't we 
