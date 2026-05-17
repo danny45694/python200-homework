@@ -19,9 +19,11 @@ if load_dotenv():
     print("Successfully loaded api key")
 
 from openai import OpenAI
-from pprint import pprint
 
 client = OpenAI()
+
+RESOURCES_DIR = Path("resources")
+RESOURCES_DIR
 
 
 # Q1
@@ -60,12 +62,12 @@ tools = [
 print('Tools list defined with one tool: celsius_to_fahrenheit')
 
 
-
+"""
 list = [0, 100, -40]
 
 for num in list:
     print(celsius_to_fahrenheit(num))
-
+"""
 
 #Q2
 
@@ -74,10 +76,9 @@ for num in list:
 
 
 def run_agent(user_prompt: str) -> str:
-    '''Run a minimal ReAct-style agent for a single user prompt.'''
+    #Run a minimal ReAct-style agent for a single user prompt.
 
-    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time or convert Celsius to Fahrenheit.
-                     Use the tool get_current_time or celsius_to_fahrenheit whenever a user asks about the time.'''
+    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time or convert Celsius to Fahrenheit. Use the tool get_current_time whenever a user asks about the time. If the user asks you to convert a celsius to fahrenheit, use the tool celsius_to_fahrenheit. '''
     
     # Step 1: start the conversation with system and user messages
     messages = [
@@ -109,13 +110,16 @@ def run_agent(user_prompt: str) -> str:
     # Step 3: check if the model requested any tools
     if first_message.tool_calls:
         print("Agentic mode engaged...")
+        print(first_message.tool_calls)
         for tool_call in first_message.tool_calls:
             function_name = tool_call.function.name
             # In this example we only have one tool: get_current_time
             if function_name == 'get_current_time':
                 tool_result = get_current_time()
             elif function_name == 'celsius_to_fahrenheit':
-                tool_result = celsius_to_fahrenheit('celsius')
+                tool_args = json.loads(tool_call.function.arguments or "{}")
+                celsius_value = tool_args["celsius"]
+                tool_result = celsius_to_fahrenheit(celsius_value)
             else:
                 tool_result = f'Error: unknown tool {function_name}.'
 
@@ -157,11 +161,13 @@ def run_agent(user_prompt: str) -> str:
 
 """
 
-answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
-print(answer)
+#The function does not run because it is configured to run a number, not a string. 
+
+#answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
+#print(answer)
 
 """
-I was correct. The AI did not call the tool because it is not programmed to use it.
+I was correct. The AI did not call the tool because it is not programmed to use it. Because the function is expecting a float instead of a number, the program crashes with a TypeError. s
 """
 
 
@@ -173,14 +179,15 @@ I was correct. The AI did not call the tool because it is not programmed to use 
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
 
+# Tool was called.
+
 response_b = run_agent("What is the boiling point of water in plain English?")
 print("Response B:", response_b)
 
 
 
 
-#Q4
-
+#Q4 
 
 class CsvManager:
     def __init__(self, resources_dir: Path):
@@ -317,18 +324,30 @@ class CsvManager:
         Compute the Pearson correlation between two columns in the loaded DataFrame.
         Returns the correlation coefficient and p-value.
         """
-    
     # your code here
+        error = self._ensure_loaded()
+        if error:
+            return error
 
-        result = pearsonr(self.df['column1'], self.df['column2'])
-        result_dict = {
-            "col1": result.column1,
-            "col2": result.column2,
-            "pearson_r" : result.statistic,
-            "p_value" : result.pvalue
+        for col in [col1, col2]:
+            if col not in self.df.columns:
+                return {"error": f"'{col}' is not a column. Options: {self.df.columns.tolist()}"}
+
+
+        corr, p = pearsonr(col1,col2)
+        pearson_r = round(corr, 4)
+        p_value = round(p, 4)
+
+        result = {
+            "col1": col1,
+            "col2": col2,
+            "pearson_r": pearson_r,
+            "p_value": p_value
         }
+        return result
 
-    
+
+
     def plot_data(self, y: str, x: str | None = None, plot_type: str = "line"):
         """
         Plot from the active CSV.
@@ -373,6 +392,7 @@ class CsvManager:
 
 print("Class defined")
 
+
 csv_backend = CsvManager(RESOURCES_DIR)
 
 node_tools = {
@@ -382,6 +402,7 @@ node_tools = {
     "summarize_columns": csv_backend.summarize_columns,
     "describe_column": csv_backend.describe_column,
     "plot_data": csv_backend.plot_data,
+    "compute_correlation": csv_backend.compute_correlation
 }
 
 tools_schema = [
@@ -470,9 +491,24 @@ tools_schema = [
             },
         },
     },
+    {
+        "type": "function",
+        "function": {
+            "name": "compute_correlation",
+            "description": "Compute the Pearson correlation between two columns in the loaded DataFrame. Return the correlation coefficient and p-value",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "column": {
+                        "type": "array",
+                        "items": {"type": "string"},
+                    }
+                },
+                "required": ["col1", "col2"],
+            },
+        },
+    },
 ]
-
-
 
 def run_agent_cycle(messages, user_text, max_tool_rounds=5):
     """
@@ -561,87 +597,47 @@ def run_agent_cycle(messages, user_text, max_tool_rounds=5):
 
     return "I hit the tool-round limit. Try a simpler request."
 
+
+# --------------------------------------- Q5 --------------------------------------------
+
+
+
 #Q5
 
-def run_agent(user_prompt: str) -> str:
-    '''Run a minimal ReAct-style agent for a single user prompt.'''
+SYSTEM_PROMPT = (
+    "You are a small data assistant for CSV files stored in resources/. "
+    "Use the available tools to do any data work (do not guess). "
+    "If no CSV is loaded yet, load one first (or list available CSV files). "
+    "Keep answers short and student-friendly."
+)
 
-    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time.
-                     Use the tool get_current_time whenever a user asks about the time.'''
-    
-    # Step 1: start the conversation with system and user messages
+def run_agent():
+    """
+    Simple command-line chat loop so it feels like a chatbot.
+
+    We keep a single 'messages' list for the whole session so the model
+    sees the conversation history each turn.
+    """
     messages = [
-        {'role': 'system', 'content': SYSTEM_PROMPT},
-        {'role': 'user', 'content': user_prompt},
+        {
+            "role": "system",
+            "content": SYSTEM_PROMPT
+        }
     ]
 
-    # Step 2: first API call - the model decides whether to call a tool
-    first_response = client.chat.completions.create(
-        model='gpt-4.1-mini',
-        messages=messages,
-        tools=tools,
-        tool_choice='auto',  # model chooses whether to use a tool
-    )
+    print("CSV data agent at your service. Here to help look at your CSV data!")
+    print("Type a question. Type 'exit' to quit.\n")
+    print("To start, try 'list csv files' or 'load bike_commute.csv'\n")
 
-    print("First response received from model...")
-    print(first_response)
-    first_message = first_response.choices[0].message
-
-    # Record what the model said so far
-    messages.append(
-        {
-            'role': 'assistant',
-            'content': first_message.content,
-            'tool_calls': first_message.tool_calls,
-        }
-    )
-
-    # Step 3: check if the model requested any tools
-    if first_message.tool_calls:
-        print("Agentic mode engaged...")
-        for tool_call in first_message.tool_calls:
-            function_name = tool_call.function.name
-            # In this example we only have one tool: get_current_time
-            if function_name == 'get_current_time':
-                tool_result = get_current_time()
-            else:
-                tool_result = f'Error: unknown tool {function_name}.'
-
-            # Print for debugging so we can see what happened
-            print('Tool called:', function_name)
-            print('Tool result:', tool_result)
-
-            # Step 3b: append the tool output so the model can see it
-            messages.append(
-                {
-                    'role': 'tool',
-                    'tool_call_id': tool_call.id,
-                    'name': function_name,
-                    'content': tool_result,
-                }
-            )
-
-        # Step 4: second API call - model sees the tool result and gives final answer
-        second_response = client.chat.completions.create(
-            model='gpt-4.1-mini',
-            messages=messages,
-        )
-        print("Second response received from model...")
-        print(second_response)
-
-        final_message = second_response.choices[0].message
-        return final_message.content or ''
-    else:
-        print("No tools needed....")
-
-    # If there were no tool calls, the first response was already the final answer
-    return first_message.content or ''
-
-messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
-print(result)
-
-#Q5 
+    while True:
+        user_text = input("You: ").strip()
+        if user_text.lower() in ["exit", "quit", "q"]:
+            print("Bye.")
+            break
+        
+        print(f"User query: {user_text}")
+        assistant_text = run_agent_cycle(messages, user_text)
+        print(f"\nAssistant: {assistant_text}\n")
 
 messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
