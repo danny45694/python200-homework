@@ -3,7 +3,17 @@ import json
 import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
+from pathlib import Path
 
+import pandas as pd
+from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+import os
+
+# smolagents imports
+#from smolagents import ToolCallingAgent, OpenAIServerModel, tool
+#from smolagents import CodeAgent
 
 if load_dotenv():
     print("Successfully loaded api key")
@@ -66,8 +76,8 @@ for num in list:
 def run_agent(user_prompt: str) -> str:
     '''Run a minimal ReAct-style agent for a single user prompt.'''
 
-    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time.
-                     Use the tool get_current_time whenever a user asks about the time.'''
+    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time or convert Celsius to Fahrenheit.
+                     Use the tool get_current_time or celsius_to_fahrenheit whenever a user asks about the time.'''
     
     # Step 1: start the conversation with system and user messages
     messages = [
@@ -104,6 +114,8 @@ def run_agent(user_prompt: str) -> str:
             # In this example we only have one tool: get_current_time
             if function_name == 'get_current_time':
                 tool_result = get_current_time()
+            elif function_name == 'celsius_to_fahrenheit':
+                tool_result = celsius_to_fahrenheit('celsius')
             else:
                 tool_result = f'Error: unknown tool {function_name}.'
 
@@ -139,20 +151,23 @@ def run_agent(user_prompt: str) -> str:
 
 
 """
+1. Not sure how to answer. Instructions confusing. Let's assume I am calling the agent with only get_current_time as its only tool. If I can run_agent, it will not trigger the tool call. That is because the agent is not setup for it. 
 
-I don't understand the question. Q2 says Copy the run_agent from lesson
-
- 1. I think calling run_agent("Convert 100 degrees Celsius to Fahrenheit") will trigger a tool call. The model LLM will look at the prompt, derive the semantic meaning, convert string into a format so it can use the function. Finally it will return the result.
- 2. I think it will perform 4 calls in total
+2. 3 calls. Once to call the AI, trigger the tool, give the output to the AI and response. 
 
 """
 
 answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
 print(answer)
 
+"""
+I was correct. The AI did not call the tool because it is not programmed to use it.
+"""
+
+
 #Q3
 
-
+#Modified run_agent function for this question.
 
 
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
@@ -165,6 +180,7 @@ print("Response B:", response_b)
 
 
 #Q4
+
 
 class CsvManager:
     def __init__(self, resources_dir: Path):
@@ -295,7 +311,24 @@ class CsvManager:
                 cleaned[key] = value
 
         return cleaned
+    
+    def compute_correlation(self, col1: str, col2: str):
+        """
+        Compute the Pearson correlation between two columns in the loaded DataFrame.
+        Returns the correlation coefficient and p-value.
+        """
+    
+    # your code here
 
+        result = pearsonr(self.df['column1'], self.df['column2'])
+        result_dict = {
+            "col1": result.column1,
+            "col2": result.column2,
+            "pearson_r" : result.statistic,
+            "p_value" : result.pvalue
+        }
+
+    
     def plot_data(self, y: str, x: str | None = None, plot_type: str = "line"):
         """
         Plot from the active CSV.
@@ -618,3 +651,84 @@ print(result)
 
 import json
 print(json.dumps(messages, indent=2, default=str))
+
+
+#Q7 
+
+@tool
+def list_csv_files() -> dict:
+    """List available CSV files in resources/.
+
+    Returns:
+        A dict with a "files" list, or a message if none are found.
+    """
+    return csv_manager.list_csv_files()
+
+
+@tool
+def load_csv(filename: str) -> dict:
+    """Load a CSV file from resources/ and make it the active dataset.
+
+    Args:
+        filename: CSV filename in resources/. You can pass "bike_commute" or "bike_commute.csv".
+
+    Returns:
+        A dict with a status message and column names, or an error dict.
+    """
+    return csv_manager.load_csv(filename)
+
+
+@tool
+def get_columns() -> list[str] | dict:
+    """Return column names for the currently loaded CSV.
+
+    Returns:
+        A list of column names, or an error dict if no CSV is loaded.
+    """
+    return csv_manager.get_columns()
+
+
+@tool
+def summarize_columns(columns: list[str] | None = None) -> dict:
+    """Return summary stats for selected columns (or all columns). 
+    This includes count, mean, std, min, max, and percentiles for numeric columns,
+    or count, unique, top, freq for categorical columns.
+
+    Args:
+        columns: Column names to summarize. If None, summarizes all columns.
+
+    Returns:
+        A dict of summary statistics (from pandas.describe), or an error dict.
+    """
+    return csv_manager.summarize_columns(columns)
+
+
+@tool
+def describe_column(column: str) -> dict:
+    """Describe a single column (basic stats) for the requested column.
+    This includes count, mean, std, min, max, and percentiles for numeric column,
+    or count, unique, top, freq for categorical column.
+
+    Args:
+        column: The name of the column to describe.
+
+    Returns:
+        A dict of basic stats for the column, or an error dict.
+    """
+    return csv_manager.describe_column(column)
+
+
+@tool
+def plot_data(y: str, x: str | None = None, plot_type: str = "line") -> str | dict:
+    """Plot from the active CSV.
+
+    Args:
+        y: Column name to plot on the y-axis. 
+        x: Column name to plot on the x-axis. If None, use row index.
+        plot_type: "line" or "scatter". Scatter requires x and y.
+
+    Returns:
+        Generates and shows the plot. 
+        Retirms a short success message string, or an error dict/string.
+    """
+    return csv_manager.plot_data(y=y, x=x, plot_type=plot_type)
