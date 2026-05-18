@@ -643,10 +643,12 @@ messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
 print(result)
 
-#Q6
+#------------------------------------- Q6 --------------------------------------------
 
 import json
 print(json.dumps(messages, indent=2, default=str))
+
+
 
 
 #Q7 
