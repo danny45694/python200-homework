@@ -12,8 +12,8 @@ from dotenv import load_dotenv
 import os
 
 # smolagents imports
-#from smolagents import ToolCallingAgent, OpenAIServerModel, tool
-#from smolagents import CodeAgent
+from smolagents import ToolCallingAgent, OpenAIServerModel, tool
+from smolagents import CodeAgent
 
 if load_dotenv():
     print("Successfully loaded api key")
@@ -333,14 +333,16 @@ class CsvManager:
             if col not in self.df.columns:
                 return {"error": f"'{col}' is not a column. Options: {self.df.columns.tolist()}"}
 
-
-        corr, p = pearsonr(col1,col2)
+        data1 = self.df[col1]
+        data2 = self.df[col2]
+        
+        corr, p = pearsonr(data1, data2)
         pearson_r = round(corr, 4)
         p_value = round(p, 4)
 
         result = {
-            "col1": col1,
-            "col2": col2,
+            "col1": data1,
+            "col2": data2,
             "pearson_r": pearson_r,
             "p_value": p_value
         }
@@ -499,10 +501,12 @@ tools_schema = [
             "parameters": {
                 "type": "object",
                 "properties": {
-                    "column": {
-                        "type": "array",
-                        "items": {"type": "string"},
-                    }
+                    "col1": {
+                        "type": "string",
+                    },
+                    "col2": {
+                        "type": "string",
+                    },
                 },
                 "required": ["col1", "col2"],
             },
@@ -643,14 +647,96 @@ messages = [{"role": "system", "content": SYSTEM_PROMPT}]
 result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
 print(result)
 
+
+"""
+"role": "assistant",
+    "content": "The correlation between average traffic density and average speed (km/h) is approximately -0.532 with a p-value of 0. This indicates a moderate negative correlation, meaning that as traffic density increases, average speed tends to decrease."
+
+"""
+
 #------------------------------------- Q6 --------------------------------------------
+
 
 import json
 print(json.dumps(messages, indent=2, default=str))
 
+#Output
+
+"""
+{
+#---------------------------------Initial System Prompt------------------------------
+ 
+    
+    "role": "system",
+    "content": "You are a small data assistant for CSV files stored in resources/. Use the available tools to do any data work (do not guess). If no CSV is loaded yet, load one first (or list available CSV files). Keep answers short and student-friendly."
+  },
+  {
+
+
+  --------------------------------- #1st user prompt ------------------------------
+
+
+    "role": "user",
+    "content": "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh."
+  },
+  {
+  #Calling tools
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+      {
+
+--------------------------------- #Loading up csv file --------------------------------
+
+
+        "id": "call_9MypWLyI0axiX9di8uAOyePg",
+        "function": {
+          "arguments": "{\"filename\":\"bike_commute.csv\"}",
+          "name": "load_csv"
+        },
+        "type": "function"
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_9MypWLyI0axiX9di8uAOyePg",
+    "content": "{\"message\": \"Loaded bike_commute.csv with shape (160, 6).\", \"columns\": [\"distance_km\", \"duration_min\", \"avg_speed_kmh\", \"avg_heart_rate\", \"avg_traffic_density\", \"rain\"]}"
+  },
+  {
+    "role": "assistant",
+    "content": null,
+    "tool_calls": [
+      {
+
+
+      #------------------------- Calling compute correlation tool ---------------------
 
 
 
+        "id": "call_cWija7ezPmMrBdolxvZUNGQX",
+        "function": {
+          "arguments": "{\"col1\":\"avg_traffic_density\",\"col2\":\"avg_speed_kmh\"}",
+          "name": "compute_correlation"
+        },
+        "type": "function"
+      }
+    ]
+  },
+  {
+    "role": "tool",
+    "tool_call_id": "call_cWija7ezPmMrBdolxvZUNGQX",
+    "content": "{\"col1\": \"0      2\\n1      7\\n2      8\\n3      3\\n4      8\\n      ..\\n155    5\\n156    7\\n157    4\\n158    6\\n159    5\\nName: avg_traffic_density, Length: 160, dtype: int64\", \"col2\": \"0      17.4\\n1      12.0\\n2       9.9\\n3      15.9\\n4      14.4\\n       ... \\n155    14.3\\n156    13.7\\n157    15.9\\n158    16.2\\n159    13.2\\nName: avg_speed_kmh, Length: 160, dtype: float64\", \"pearson_r\": -0.5321, \"p_value\": 0.0}"
+  },
+  {
+
+
+  -------------------------------------- Output --------------------------------------
+    "role": "assistant",
+    "content": "The Pearson correlation between avg_traffic_density and avg_speed_kmh is approximately -0.532, with a p-value of 0. This indicates a moderate negative correlation: as average traffic density increases, average speed tends to decrease."
+  }
+]
+"""
 #Q7 
 
 @tool
