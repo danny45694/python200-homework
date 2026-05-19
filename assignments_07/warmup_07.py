@@ -739,51 +739,57 @@ print(json.dumps(messages, indent=2, default=str))
 """
 
 
-#Q7 
+#Smolagents setup
 
+from pathlib import Path
+
+import pandas as pd
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+import os
+
+# smolagents imports
+from smolagents import ToolCallingAgent, OpenAIServerModel, tool
+from smolagents import CodeAgent
+
+if load_dotenv():
+    print("Successfully loaded environment variables from .env")
+else:
+    print("Warning: could not load environment variables from .env")
+api_key = os.getenv("OPENAI_API_KEY")
+
+RESOURCES_DIR = Path("resources")
+
+#Q7 
+csv_manager = CsvManager(resources_dir=RESOURCES_DIR)
 
 @tool
-def compute_correlation(self, col1: str, col2: str):
+def compute_correlation(col1: str, col2: str) -> dict:
         """
         Compute the Pearson correlation between two columns in the loaded DataFrame.
         Returns the correlation coefficient and p-value.
 
         Args:
-            self
-            col1:
-            col2:
+            col1: Column 1 used for the Pearson correlation
+            col2: Column 2 used for the Pearson correlation
 
             Returns:
-                 A dict with a key for col1, col2, pearson_r, p_value, or a message if none are found.
-
-
-        data1 = self.df[col1]
-        data2 = self.df[col2]
-        
-        corr, p = pearsonr(data1, data2)
-        pearson_r = round(corr, 4)
-        p_value = round(p, 4)
-
-        result = {
-            "col1": data1,
-            "col2": data2,
-            "pearson_r": pearson_r,
-            "p_value": p_value
-        }
-        return result
+                 A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
 
         """
+        
+        return csv_manager.compute_correlation(col1, col2)
 
 
 print(compute_correlation.description)
 
-
+# The print comment above creates a description from the docstring and type hints. In Q4, I wrote the JSON and had to specify data, properties and required parameters. Smolagents needs a good prompt, hints and a clear function name to produce a useful description.
 
 #----------------------------------------- Q8 ------------------------------------------
 
-csv_manager = CsvManager(resources_dir=RESOURCES_DIR)
 
 
+prompt = "Load bike_commute.csv. Plot avg_heart_rate vs duration_min as a scatter plot with green dots."
 
 
 @tool
@@ -921,3 +927,21 @@ SYSTEM_PROMPT = (
 tool_agent = ToolCallingAgent(tools=TOOLS,
                          model=model,
                          instructions=SYSTEM_PROMPT,)
+
+code_agent = CodeAgent(
+    tools=TOOLS,
+    model=model,
+    instructions=CODE_INSTRUCTIONS,
+    additional_authorized_imports=["pandas", "matplotlib.pyplot", "numpy"],
+    max_steps=8,
+)
+
+
+prompt = "Load bike_commute.csv. Plot avg_heart_rate vs duration_min as a scatter plot with green dots."
+
+response_tool = tool_agent.run(prompt)
+response_code = code_agent.run(prompt, additional_args={"csv_manager": csv_manager})
+
+# ToolCallingAgent and Code Agent both changed the dot color and produced different outputs.
+
+# --------------------------------------- Q9 -------------------------------------------
