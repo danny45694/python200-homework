@@ -22,32 +22,56 @@ else:
     print("Warning: could not load environment variables from .env")
 api_key = os.getenv("OPENAI_API_KEY")
 
-
-
 client = OpenAI()
 
-target_dir = Path.cwd().parent / "assignments_01" / "outputs"
-for file in target_dir.glob("*"):
-    print(file.name)
 
-if target_dir.exists():
-     print("Folder found!")
+# ------------------------------------- Pre-task --------------------------------------
+
+DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs"
+
+#Check for outputs existence
+if DATA_PATH.exists():
+    print("Outputs folder found!")
+    for file in DATA_PATH.glob("*"):
+        print(file.name)
+else:
+    # 3. Fallback path if outputs is missing
+    DATA_PATH = Path.cwd().parent / "assignments_01" / "happiness_project"
+    
+    if DATA_PATH.exists():
+        print("Outputs not found. Happiness_project folder found.")
+        for file in DATA_PATH.glob("*"):
+            print(file.name)
+    else:
+        print("Neither folder was found.")
 
 
+# Add the code to merge the csvs together and store in Dataframe
 
-
-DATA_PATH = "target_dir"
-
+#Global Dataframe
 df = None
 
 
-
 @tool
-def load_happiness_data() -> dict:
-    global df
+def load_happiness_data(DATA_PATH) -> dict:
     """
-    Load the World Happiness dataset into from assignments_01/outputs/ and make it the active dataset.
+    Load the csv file from DATA_PATH, store it in the global df. 
 
+    filename can be "merged_happiness" or "merged_happiness.csv"
+
+    """
+
+    global df
+
+    def load_csv(df, filename: str):
+        df = pd.read_csv(DATA_PATH)
+        df.csv_name = filename
+        
+        return {"shape": df.shape, "columns": df.columns.tolist()}
+ 
+
+ # Need to move this elsewhere
+"""
     Args:
         filename: CSV filename in assignments_01/outputs/. You can pass "merged_happiness" or merged_happiness.csv". 
         If merged_happiness does not exist.
@@ -56,48 +80,7 @@ def load_happiness_data() -> dict:
     Returns:
         Store the result in the global "df" variable. Return a dict with "shape" and "columns"
     """
-
-
-#def load_happiness_data() -> dict:
      
-
-def list_csv_files(self):
-    """
-    List available CSV files in resources/.
-    """
-    files = self._available_csv_files()
-    if not files:
-        return {
-            "message": (
-                "No CSV files found in resources/. "
-                "Create a resources/ folder and put one or more .csv files inside it."
-            ),
-            "files": [],
-        }
-    return {"files": files}
-
-def load_csv(self, filename: str):
-    """
-    Load a CSV file from resources/ and make it the active dataset.
-
-    filename can be "bike_commute" or "bike_commute.csv".
-    """
-    filename = self._normalize_csv_name(filename)
-    path = self.resources_dir / filename
-
-    if not path.exists():
-        return {
-            "error": f"Could not find '{filename}' in resources/.",
-            "available_files": self._available_csv_files(),
-        }
-
-    self.df = pd.read_csv(path)
-    self.csv_name = filename
-
-    return {
-        "message": f"Loaded {filename} with shape {self.df.shape}.",
-        "columns": self.df.columns.tolist(),
-    }
 
 def get_columns(self):
     """
@@ -107,6 +90,8 @@ def get_columns(self):
     if error:
         return error
     return self.df.columns.tolist()
+
+
 
 def summarize_columns(self, columns: list[str] | None = None):
     """
