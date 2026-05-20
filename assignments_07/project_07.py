@@ -26,8 +26,17 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI()
 
+target_dir = Path.cwd().parent / "assignments_01" / "outputs"
+for file in target_dir.glob("*"):
+    print(file.name)
 
-DATA_PATH = "assignments_01/outputs/merged_happiness.csv"
+if target_dir.exists():
+     print("Folder found!")
+
+
+
+
+DATA_PATH = "target_dir"
 
 df = None
 
@@ -49,74 +58,77 @@ def load_happiness_data() -> dict:
     """
 
 
+#def load_happiness_data() -> dict:
+     
+
 def list_csv_files(self):
-        """
-        List available CSV files in resources/.
-        """
-        files = self._available_csv_files()
-        if not files:
-            return {
-                "message": (
-                    "No CSV files found in resources/. "
-                    "Create a resources/ folder and put one or more .csv files inside it."
-                ),
-                "files": [],
-            }
-        return {"files": files}
-
-    def load_csv(self, filename: str):
-        """
-        Load a CSV file from resources/ and make it the active dataset.
-
-        filename can be "bike_commute" or "bike_commute.csv".
-        """
-        filename = self._normalize_csv_name(filename)
-        path = self.resources_dir / filename
-
-        if not path.exists():
-            return {
-                "error": f"Could not find '{filename}' in resources/.",
-                "available_files": self._available_csv_files(),
-            }
-
-        self.df = pd.read_csv(path)
-        self.csv_name = filename
-
+    """
+    List available CSV files in resources/.
+    """
+    files = self._available_csv_files()
+    if not files:
         return {
-            "message": f"Loaded {filename} with shape {self.df.shape}.",
-            "columns": self.df.columns.tolist(),
+            "message": (
+                "No CSV files found in resources/. "
+                "Create a resources/ folder and put one or more .csv files inside it."
+            ),
+            "files": [],
+        }
+    return {"files": files}
+
+def load_csv(self, filename: str):
+    """
+    Load a CSV file from resources/ and make it the active dataset.
+
+    filename can be "bike_commute" or "bike_commute.csv".
+    """
+    filename = self._normalize_csv_name(filename)
+    path = self.resources_dir / filename
+
+    if not path.exists():
+        return {
+            "error": f"Could not find '{filename}' in resources/.",
+            "available_files": self._available_csv_files(),
         }
 
-    def get_columns(self):
-        """
-        Return column names for the currently loaded CSV.
-        """
-        error = self._ensure_loaded()
-        if error:
-            return error
-        return self.df.columns.tolist()
+    self.df = pd.read_csv(path)
+    self.csv_name = filename
 
-    def summarize_columns(self, columns: list[str] | None = None):
-        """
-        Return basic summary stats for one or more columns.
+    return {
+        "message": f"Loaded {filename} with shape {self.df.shape}.",
+        "columns": self.df.columns.tolist(),
+    }
 
-        If columns is None, summarize all columns.
-        Uses pandas.describe(include="all") to stay simple and readable.
-        """
-        error = self._ensure_loaded()
-        if error:
-            return error
+def get_columns(self):
+    """
+    Return column names for the currently loaded CSV.
+    """
+    error = self._ensure_loaded()
+    if error:
+        return error
+    return self.df.columns.tolist()
 
-        if columns is None:
-            data = self.df
-        else:
-            missing = [c for c in columns if c not in self.df.columns]
-            if missing:
-                return {"error": f"These columns are not in the data: {missing}"}
-            data = self.df[columns]
+def summarize_columns(self, columns: list[str] | None = None):
+    """
+    Return basic summary stats for one or more columns.
 
-        summary = data.describe(include="all").transpose().round(3)
-        return summary.to_dict()
+    If columns is None, summarize all columns.
+    Uses pandas.describe(include="all") to stay simple and readable.
+    """
+    error = self._ensure_loaded()
+    if error:
+        return error
+
+    if columns is None:
+        data = self.df
+    else:
+        missing = [c for c in columns if c not in self.df.columns]
+        if missing:
+            return {"error": f"These columns are not in the data: {missing}"}
+        data = self.df[columns]
+
+    summary = data.describe(include="all").transpose().round(3)
+    return summary.to_dict()
 
 @tool
 def summarize_column(column: str) -> dict:
