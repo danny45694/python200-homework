@@ -656,11 +656,13 @@ print(result)
 
 #------------------------------------- Q6 --------------------------------------------
 
-
+print( "Q6")
 import json
 print(json.dumps(messages, indent=2, default=str))
 
+
 #Output
+
 
 """
 {
@@ -945,3 +947,14 @@ response_code = code_agent.run(prompt, additional_args={"csv_manager": csv_manag
 # ToolCallingAgent and Code Agent both changed the dot color and produced different outputs.
 
 # --------------------------------------- Q9 -------------------------------------------
+
+
+"""
+
+    1. Tool calling agents are better when you need simple retrieval. They operate in constrained environments and use less tokens while providing outputs faster.
+    Code Agents are better for complex reasoning or flexible workflows. They are not limited in the tools they use. They can create their own if it is deemed necessary to answer the prompt.
+
+    2. CodeAgents can provide unwanted results. They are more susceptable to hallucinations and can delete or edit files they should not be touching.
+
+
+"""

@@ -60,14 +60,9 @@ def load_happiness_data(DATA_PATH) -> dict:
     filename can be "merged_happiness" or "merged_happiness.csv"
 
     """
-
     global df
-
-    def load_csv(df, filename: str):
-        df = pd.read_csv(DATA_PATH)
-        df.csv_name = filename
-        
-        return {"shape": df.shape, "columns": df.columns.tolist()}
+    df = pd.read_csv(DATA_PATH)
+    return {"shape": df.shape, "columns": df.columns.tolist()}
  
 
  # Need to move this elsewhere
@@ -92,28 +87,25 @@ def get_columns(self):
     return self.df.columns.tolist()
 
 
+@tool
+def summarize_column(column: str) -> dict:
 
-def summarize_columns(self, columns: list[str] | None = None):
     """
     Return basic summary stats for one or more columns.
 
     If columns is None, summarize all columns.
     Uses pandas.describe(include="all") to stay simple and readable.
+
     """
-    error = self._ensure_loaded()
-    if error:
-        return error
 
-    if columns is None:
-        data = self.df
-    else:
-        missing = [c for c in columns if c not in self.df.columns]
-        if missing:
-            return {"error": f"These columns are not in the data: {missing}"}
-        data = self.df[columns]
+    if df is None:
+        return {"error": "No data loaded yet. Please run load_happiness_data first."}
+    
+    if column not in df.columns:
+        return {"error": f"'{column}' is not a column. Options: {df.columns.tolist()}"}
+    
+    return df[column].describe().to_dict()
 
-    summary = data.describe(include="all").transpose().round(3)
-    return summary.to_dict()
 
 @tool
 def summarize_column(column: str) -> dict:
@@ -121,12 +113,19 @@ def summarize_column(column: str) -> dict:
     Return descriptive statistics for a single column in the loaded dataset
 
     Args:
-        columns: Column names to summarize. If None, summarizes all columns.
+        columns: Column names to summarize. If columns is None, summarize all columns.
 
     Returns:
         A dict of summary statistics (from pandas.describe), or an error dict.
     """
-    return df[column].describe().to.dict()
+
+    if column is None:
+        data = df
+    else:
+        missing = str not in df.columns
+        if missing:
+            return {"error": f"This column is not in the data: {missing}"}
+    return df[column].describe().to_dict()
 
 
 @tool
@@ -143,6 +142,26 @@ def compute_correlation(col1: str, col2: str) -> dict:
                  A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
 
         """
+
+        for col in [col1, col2]:
+            if col not in df.columns:
+                return {"error": f"'{col}' is not a column. Options: {df.columns.tolist()}"}
+            
+        data1 = df[col1]
+        data2 = df[col2]
+
+        corr, p = pearsonr(data1, data2)
+        pearson_r = round(corr, 4)
+        p_value = round(p, 4)
+
+
+        result = {
+            "col1": data1,
+            "col2": data2,
+            "pearson_r": pearson_r,
+            "p_value": p_value
+        }
+        return result
         
         return df.compute_correlation(col1, col2)
 
@@ -151,9 +170,6 @@ def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
     """Return the top N countries ranked by a given column for a specific year.
     ...
     """
-
-csv_manager = CsvManager(resources_dir=DATA_PATH)
-
 
 
 
