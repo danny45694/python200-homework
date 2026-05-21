@@ -4,7 +4,10 @@ import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
 from pathlib import Path
-
+import re
+from prefect import task, flow
+from pandas.api.types import is_numeric_dtype
+from prefect.logging import get_run_logger
 import pandas as pd
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
@@ -27,6 +30,33 @@ client = OpenAI()
 
 # ------------------------------------- Pre-task --------------------------------------
 
+def convert_list(folder):
+    #logger = get_run_logger()
+    converted_list = []
+    for file in folder:
+        #Find year in each file
+        year = re.findall(r'\d+', file)
+        #Pandas read csv file
+        df = pd.read_csv(file, sep = ";", decimal=",") 
+        #add year to csv files
+        df['Year'] = int(year[0])
+
+    #2024 has "Ladder score" not "Happiness score", need to modify dataframe
+        if int(year[0]) == 2024:
+            df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
+        
+        #new list with created data frames
+        converted_list.append(df)
+    logger.info("Files successfully converted to dataframe and added to list")  
+    return converted_list
+
+def merge_dataframes(converted_list):
+    logger = get_run_logger()
+    merged_dataframe = pd.concat(converted_list)
+    logger.info("Dataframes in list successfully merged together")
+    return merged_dataframe
+
+
 DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs"
 
 #Check for outputs existence
@@ -36,17 +66,20 @@ if DATA_PATH.exists():
         print(file.name)
 else:
     # 3. Fallback path if outputs is missing
-    DATA_PATH = Path.cwd().parent / "assignments_01" / "happiness_project"
+    folder = Path.cwd().parent / "assignments_01" / "happiness_project"
     
-    if DATA_PATH.exists():
+    if folder.exists():
         print("Outputs not found. Happiness_project folder found.")
-        for file in DATA_PATH.glob("*"):
-            print(file.name)
+        converted_list = convert_list(folder)
+        merged_dataframe = merge_dataframes(converted_list)
+        return merged_dataframe
     else:
         print("Neither folder was found.")
 
-
 # Add the code to merge the csvs together and store in Dataframe
+
+
+
 
 #Global Dataframe
 df = None
@@ -162,14 +195,15 @@ def compute_correlation(col1: str, col2: str) -> dict:
             "p_value": p_value
         }
         return result
-        
-        return df.compute_correlation(col1, col2)
+
 
 @tool
 def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
     """Return the top N countries ranked by a given column for a specific year.
     ...
     """
+
+
 
 
 
