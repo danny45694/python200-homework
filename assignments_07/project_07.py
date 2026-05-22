@@ -5,16 +5,13 @@ import pandas as pd
 from datetime import datetime
 from pathlib import Path
 import re
-from prefect import task, flow
 from pandas.api.types import is_numeric_dtype
-from prefect.logging import get_run_logger
 import pandas as pd
 from scipy.stats import pearsonr
 import matplotlib.pyplot as plt
 from dotenv import load_dotenv
 import os
 from openai import OpenAI
-
 # smolagents imports
 from smolagents import ToolCallingAgent, OpenAIServerModel, tool
 from smolagents import CodeAgent
@@ -27,11 +24,15 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI()
 
+#Global Dataframe placeholder
+df = None
+
+DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs"
 
 # ------------------------------------- Pre-task --------------------------------------
 
+#Created merged_happiness.csv if it doesn't exist. 
 def convert_list(folder):
-    #logger = get_run_logger()
     converted_list = []
     for file in folder:
         #Find year in each file
@@ -46,119 +47,89 @@ def convert_list(folder):
             df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
         
         #new list with created data frames
-        converted_list.append(df)
-    logger.info("Files successfully converted to dataframe and added to list")  
+        converted_list.append(df)  
     return converted_list
 
 def merge_dataframes(converted_list):
-    logger = get_run_logger()
     merged_dataframe = pd.concat(converted_list)
-    logger.info("Dataframes in list successfully merged together")
     return merged_dataframe
 
 
-DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs"
+    
 
 #Check for outputs existence
-if DATA_PATH.exists():
-    print("Outputs folder found!")
-    for file in DATA_PATH.glob("*"):
-        print(file.name)
-else:
-    # 3. Fallback path if outputs is missing
-    folder = Path.cwd().parent / "assignments_01" / "happiness_project"
-    
-    if folder.exists():
-        print("Outputs not found. Happiness_project folder found.")
-        converted_list = convert_list(folder)
-        merged_dataframe = merge_dataframes(converted_list)
-        return merged_dataframe
+def check_data_path():
+    if DATA_PATH.exists():
+        print("Outputs folder found!")
+        for file in DATA_PATH.glob("*"):
+            print(file.name)
     else:
-        print("Neither folder was found.")
-
-# Add the code to merge the csvs together and store in Dataframe
-
-
-
-
-#Global Dataframe
-df = None
+        # 3. Fallback path if outputs is missing
+        folder = Path.cwd().parent / "assignments_01" / "happiness_project"
+        
+        if folder.exists():
+            print("Outputs not found. Happiness_project folder found.")
+            converted_list = convert_list(folder)
+            merged_dataframe = merge_dataframes(converted_list)
+            #Save so we can find it later
+            DATA_PATH.mkdir(parents=True, exist_ok=True)
+            merged_dataframe.to_csv(DATA_PATH / "merged_happiness.csv", index=False)
+            return merged_dataframe
+        else:
+            print("Neither folder was found.")
 
 
 @tool
-def load_happiness_data(DATA_PATH) -> dict:
+def load_happiness_data() -> dict:
     """
-    Load the csv file from DATA_PATH, store it in the global df. 
-
-    filename can be "merged_happiness" or "merged_happiness.csv"
+    Load the csv file from DATA_PATH and store it in the global df. 
+    Args:
+        path_str: String path to the CSV dataset file.
 
     """
     global df
+
+    #Checks if merged happiness csv exists. If does not, merge the base csv files to create it.
+    if DATA_PATH.exists():
+        print("Outputs folder found!")
+        for file in DATA_PATH.glob("*"):
+            print(file.name)
+    else:
+        # 3. Fallback path if outputs is missing
+        folder = Path.cwd().parent / "assignments_01" / "happiness_project"
+        
+        if folder.exists():
+            print("Outputs not found. Happiness_project folder found.")
+            converted_list = convert_list(folder)
+            merged_dataframe = merge_dataframes(converted_list)
+            #Save so we can find it later
+            DATA_PATH.mkdir(parents=True, exist_ok=True)
+            merged_dataframe.to_csv(DATA_PATH / "merged_happiness.csv", index=False)
+            return merged_dataframe
+        else:
+            print("Neither folder was found.")
+
     df = pd.read_csv(DATA_PATH)
+    if len(df) == 0:
+        return {"error": "DATA_PATH is empty. Double check path is correct"}
     return {"shape": df.shape, "columns": df.columns.tolist()}
- 
-
- # Need to move this elsewhere
-"""
-    Args:
-        filename: CSV filename in assignments_01/outputs/. You can pass "merged_happiness" or merged_happiness.csv". 
-        If merged_happiness does not exist.
-        filename: CSV files in assignments_01/happiness_project. Iterate through each file, merging all the yearly CSV files.
-
-    Returns:
-        Store the result in the global "df" variable. Return a dict with "shape" and "columns"
-    """
-     
-
-def get_columns(self):
-    """
-    Return column names for the currently loaded CSV.
-    """
-    error = self._ensure_loaded()
-    if error:
-        return error
-    return self.df.columns.tolist()
 
 
 @tool
 def summarize_column(column: str) -> dict:
 
     """
-    Return basic summary stats for one or more columns.
-
-    If columns is None, summarize all columns.
-    Uses pandas.describe(include="all") to stay simple and readable.
-
+    Return basic descriptive stats for a single column.
+    Args:
+        column: The exact name of the column to summarize. 
     """
 
     if df is None:
         return {"error": "No data loaded yet. Please run load_happiness_data first."}
-    
     if column not in df.columns:
         return {"error": f"'{column}' is not a column. Options: {df.columns.tolist()}"}
-    
     return df[column].describe().to_dict()
 
-
-@tool
-def summarize_column(column: str) -> dict:
-    """
-    Return descriptive statistics for a single column in the loaded dataset
-
-    Args:
-        columns: Column names to summarize. If columns is None, summarize all columns.
-
-    Returns:
-        A dict of summary statistics (from pandas.describe), or an error dict.
-    """
-
-    if column is None:
-        data = df
-    else:
-        missing = str not in df.columns
-        if missing:
-            return {"error": f"This column is not in the data: {missing}"}
-    return df[column].describe().to_dict()
 
 
 @tool
@@ -173,24 +144,26 @@ def compute_correlation(col1: str, col2: str) -> dict:
 
             Returns:
                  A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
-
         """
+
+        if df is None:
+            return {"error": "No data loaded yet"}
 
         for col in [col1, col2]:
             if col not in df.columns:
                 return {"error": f"'{col}' is not a column. Options: {df.columns.tolist()}"}
             
-        data1 = df[col1]
-        data2 = df[col2]
+        # Clean data
+        clean_df = df[[col1, col2]].dropna()
+        corr, p = pearsonr(clean_df[col1], clean_df[col2])
 
-        corr, p = pearsonr(data1, data2)
         pearson_r = round(corr, 4)
         p_value = round(p, 4)
 
 
         result = {
-            "col1": data1,
-            "col2": data2,
+            "col1": col1,
+            "col2": col2,
             "pearson_r": pearson_r,
             "p_value": p_value
         }
@@ -200,23 +173,32 @@ def compute_correlation(col1: str, col2: str) -> dict:
 @tool
 def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
     """Return the top N countries ranked by a given column for a specific year.
-    ...
+    Args:
+        column: Column name to sort values by.
+        year: Target year as an integer.
+        n: Number of top results to return.
     """
 
-    if not isinstance(column, str) or not isinstance(year, int):
-        return {"error": "bad input. Enter in a column name as string and year as integer"}
+    if df is None:
+        return {"error": "No data loaded yet. Please run load_happiness_data first."}
     
-    df_filtered = df[(df['year']== year)]
-    sort = df.sort_values(by=[column], ascending=False)
-    top_n_rows = df.iloc[0: n]
+    if column not in df.columns:
+        return {"error": f"Column {column} missing."}
     
-    return {"country": column}
+    df_filtered = df[(df['Year'] == year)].copy()
+    if len(df_filtered) == 0:
+        return {"error": "Year does not exist"}
+    result = (df_filtered
+              .sort_values(by=column, ascending=False)
+              .iloc[:n][['Country', column]])
+    
+
+    return result.to_dict(orient='records')
+
     
 
 
 # ------------------------------------- Task 2 -------------------------------------------
-
-from smolagents import CodeAgent, OpenAIServerModel
 
 model = OpenAIServerModel(api_key=api_key, model_id="gpt-4o-mini")
 
@@ -237,40 +219,38 @@ agent = CodeAgent(
 )
 
 
+if __name__ == "__main__":
+
+    # ------------------------------------- Task 3 ------------------------------------------
 
 
-
-# ------------------------------------- Task 3 ------------------------------------------
-
-
-queries = [
-    "Load the happiness data and tell me its shape and column names.",
-    "Summarize the happiness_score column.",
-    "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
-    "Show me the top 5 happiest countries in 2020.",
-    "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
-]
-
-for query in queries:
-    print(f"\n--- Query: {query} ---")
-    response = agent.run(query, reset=False)
-    print(response)
+    queries = [
+        "Load the happiness data and tell me its shape and column names.",
+        "Summarize the happiness_score column.",
+        "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
+        "Show me the top 5 happiest countries in 2020.",
+        "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
+    ]
 
 
+    for query in queries:
+        print(f"\n--- Query: {query} ---")
+        response = agent.run(query, reset=False)
+        print(response)
 
 # ------------------------------------- Task 4 --------------------------------------
 
-"""
-# My query 1
-my_query_1 = "..."   # replace with your question
-response_1 = agent.run(my_query_1, reset=False)
-print(response_1)
-# Comment: Did this trigger tool use, code generation, or both?
+    """
+    # My query 1
+    my_query_1 = "..."   # replace with your question
+    response_1 = agent.run(my_query_1, reset=False)
+    print(response_1)
+    # Comment: Did this trigger tool use, code generation, or both?
 
-# My query 2
-my_query_2 = "..."   # replace with your question
-response_2 = agent.run(my_query_2, reset=False)
-print(response_2)
-# Comment: Did this trigger tool use, code generation, or both?
+    # My query 2
+    my_query_2 = "..."   # replace with your question
+    response_2 = agent.run(my_query_2, reset=False)
+    print(response_2)
+    # Comment: Did this trigger tool use, code generation, or both?
 
-"""
+    """
