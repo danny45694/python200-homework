@@ -203,14 +203,18 @@ def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
     ...
     """
 
+    if df is None:
+        return {"error": "No data loaded yet. Please run load_happiness_data first."}
+
     if not isinstance(column, str) or not isinstance(year, int):
         return {"error": "bad input. Enter in a column name as string and year as integer"}
     
-    df_filtered = df[(df['year']== year)]
-    sort = df.sort_values(by=[column], ascending=False)
-    top_n_rows = df.iloc[0: n]
-    
-    return {"country": column}
+    df_filtered = df[(df['year']== year)].copy()
+    result = (df_filtered
+              .sort_values(by=column, ascending=False)
+              .iloc[:n][['country', column]])
+    return result.to_dict(orient='records')
+
     
 
 
