@@ -27,7 +27,7 @@ client = OpenAI()
 #Global Dataframe placeholder
 df = None
 
-DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs"
+DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs" / "merged_happiness.csv"
 
 # ------------------------------------- Pre-task --------------------------------------
 
@@ -254,3 +254,16 @@ if __name__ == "__main__":
     # Comment: Did this trigger tool use, code generation, or both?
 
     """
+
+
+
+
+# -------------------------------------- Task 5 -------------------------------------
+
+
+# --- Reflection ---
+
+"""
+ 1. 
+
+"""
