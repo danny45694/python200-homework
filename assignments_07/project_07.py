@@ -3,14 +3,11 @@ import json
 import matplotlib.pyplot as plt
 import pandas as pd
 from datetime import datetime
-from pathlib import Path
 import re
 from pandas.api.types import is_numeric_dtype
-import pandas as pd
 from scipy.stats import pearsonr
-import matplotlib.pyplot as plt
-from dotenv import load_dotenv
 import os
+from pathlib import Path
 from openai import OpenAI
 # smolagents imports
 from smolagents import ToolCallingAgent, OpenAIServerModel, tool
@@ -27,31 +24,34 @@ client = OpenAI()
 #Global Dataframe placeholder
 df = None
 
+base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(base, "assignments_01", "outputs", "merged_happiness.csv")
 
-DATA_DIR = Path("assignments_01/outputs")
-DATA_PATH = DATA_DIR / "merged_happiness.csv"
-FALLBACK_FOLDER = Path("assignments_01/happiness_project")
+FALLBACK_FOLDER = os.path.join(base, "assignments_01", "happiness")
 
 # ------------------------------------- Pre-task --------------------------------------
 
 #Created merged_happiness.csv if it doesn't exist. 
-def convert_list(folder_path):
-    converted_list = []
-    for file in folder_path.glob("*.csv"):
-        #Find year in each file
-        year = re.findall(r'\d+', file.name)
-        if not year:
-            continue
+def file_path(FALLBACK_FOLDER):
+    file_list = []
+    for file in os.listdir(FALLBACK_FOLDER):
+        full_path = os.path.join(FALLBACK_FOLDER, file)
+        file_list.append(full_path)
+    return file_list
 
-        current_year = int(year[0])
+def convert_list(file_list):
+    converted_list = []
+    for file in file_list:
+        #Find year in each file
+        year = re.findall(r'\d+', file)
 
         #Pandas read csv file
         df = pd.read_csv(file, sep = ";", decimal=",") 
         #add year to csv files
-        df['Year'] = current_year
+        df['Year'] = int(year[0])
 
     #2024 has "Ladder score" not "Happiness score", need to modify dataframe
-        if current_year == 2024:
+        if int(year[0]) == 2024:
             df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
         
         #new list with created data frames
@@ -72,18 +72,23 @@ def load_happiness_data() -> dict:
 
     """
     global df
+    global base
+    global DATA_PATH
+    global FALLBACK_FOLDER
 
-    #Checks if merged happiness csv exists. If does not, merge the base csv files to create it.
-    if not DATA_PATH.exists():
+    """
+    First checks if the DATA_PATH is a valid path. If directory does not exist, proceeds to check the "FALLBACK_FOLDER" which contains the raw data files and recreates the dataframe. 
+
+    """
+    if not os.path.exists(DATA_PATH):
         print("Outputs not found. Attempting fallback to happiness_project folder...")
-        if FALLBACK_FOLDER.exists():
-            converted_list = convert_list(FALLBACK_FOLDER)
-            merged_dataframe = merge_dataframes(converted_list)
-            
-            DATA_DIR.mkdir(parents=True, exist_ok=True)
-            merged_dataframe.to_csv(DATA_PATH, index=False)
-        else:
-            return {"error": "Neither the merged file nor the raw data folder was found."}
+        if not os.path.exists(FALLBACK_FOLDER):
+            return {"error": "Neither the merged file nor raw data folder was found."}
+        file_list = file_path(FALLBACK_FOLDER)
+        converted_list = convert_list(file_list)
+        merged_dataframe = merge_dataframes(converted_list)
+        DATA_PATH = merged_dataframe
+    
 
     df = pd.read_csv(DATA_PATH)
     if len(df) == 0:
@@ -180,8 +185,13 @@ model = OpenAIServerModel(api_key=api_key, model_id="gpt-4o-mini")
 SYSTEM_PROMPT = """
 You are a data analyst assistant for the World Happiness dataset.
 Use the available tools for loading data, summarizing columns, computing correlations,
-and ranking countries. Write Python code directly only when the tools are not sufficient
-(for example, when creating custom plots or computing something the tools don't cover).
+and ranking countries.
+IMPORTANT RULES:
+- Tools return all the data you need. Use their return values directly.
+- NEVER access or reference a variable called df. It does not exist in your environment.
+- Do NOT reload data yourself with pandas after calling load_happiness_data.
+- Write Python code only for plotting or computations not covered by tools.
+- The load_happiness_data tool returns shape and columns directly. Use that return value. There is no df variable available to you.
 Be concise and student-friendly in your responses.
 """
 
@@ -196,15 +206,17 @@ agent = CodeAgent(
 
 if __name__ == "__main__":
 
-    # ------------------------------------- Task 3 ------------------------------------------
+
+
+# ------------------------------------- Task 3 ------------------------------------------
 
 
     queries = [
-        "Load the happiness data and tell me its shape and column names.",
-        "Summarize the happiness_score column.",
-        "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
-        "Show me the top 5 happiest countries in 2020.",
-        "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
+    "Load the happiness data and tell me its shape and column names.",
+    "Summarize the happiness_score column.",
+    "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
+    "Show me the top 5 happiest countries in 2020.",
+    "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
     ]
 
 
@@ -242,3 +254,4 @@ if __name__ == "__main__":
  1. 
 
 """
+
