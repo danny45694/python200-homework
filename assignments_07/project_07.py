@@ -1,10 +1,8 @@
 from dotenv import load_dotenv
-import json
 import matplotlib.pyplot as plt
 import pandas as pd
-from datetime import datetime
 import re
-from pandas.api.types import is_numeric_dtype
+
 from scipy.stats import pearsonr
 import os
 from pathlib import Path
@@ -66,7 +64,8 @@ def merge_dataframes(converted_list):
 @tool
 def load_happiness_data() -> dict:
     """
-    Load the csv file from DATA_PATH and store it in the global df. 
+    Load the csv file from DATA_PATH, generates a dataframe and stores it in global "df" variable.  
+
     Args:
         path_str: String path to the CSV dataset file.
 
@@ -76,10 +75,6 @@ def load_happiness_data() -> dict:
     global DATA_PATH
     global FALLBACK_FOLDER
 
-    """
-    First checks if the DATA_PATH is a valid path. If directory does not exist, proceeds to check the "FALLBACK_FOLDER" which contains the raw data files and recreates the dataframe. 
-
-    """
     if not os.path.exists(DATA_PATH):
         print("Outputs not found. Attempting fallback to happiness_project folder...")
         if not os.path.exists(FALLBACK_FOLDER):
@@ -185,13 +180,8 @@ model = OpenAIServerModel(api_key=api_key, model_id="gpt-4o-mini")
 SYSTEM_PROMPT = """
 You are a data analyst assistant for the World Happiness dataset.
 Use the available tools for loading data, summarizing columns, computing correlations,
-and ranking countries.
-IMPORTANT RULES:
-- Tools return all the data you need. Use their return values directly.
-- NEVER access or reference a variable called df. It does not exist in your environment.
-- Do NOT reload data yourself with pandas after calling load_happiness_data.
-- Write Python code only for plotting or computations not covered by tools.
-- The load_happiness_data tool returns shape and columns directly. Use that return value. There is no df variable available to you.
+and ranking countries. Write Python code directly only when the tools are not sufficient
+(for example, when creating custom plots or computing something the tools don't cover).
 Be concise and student-friendly in your responses.
 """
 
@@ -227,7 +217,8 @@ if __name__ == "__main__":
 
 # ------------------------------------- Task 4 --------------------------------------
 
-    """
+
+"""
     # My query 1
     my_query_1 = "..."   # replace with your question
     response_1 = agent.run(my_query_1, reset=False)
@@ -239,9 +230,7 @@ if __name__ == "__main__":
     response_2 = agent.run(my_query_2, reset=False)
     print(response_2)
     # Comment: Did this trigger tool use, code generation, or both?
-
-    """
-
+"""
 
 
 
