@@ -1,171 +1,262 @@
-#Q5
+from dotenv import load_dotenv
+import json
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime
+import re
+from pandas.api.types import is_numeric_dtype
+import pandas as pd
+from scipy.stats import pearsonr
+import matplotlib.pyplot as plt
+from dotenv import load_dotenv
+import os
+from pathlib import Path
+from openai import OpenAI
+# smolagents imports
+from smolagents import ToolCallingAgent, OpenAIServerModel, tool
+from smolagents import CodeAgent
 
-def run_agent(user_prompt: str) -> str:
-    '''Run a minimal ReAct-style agent for a single user prompt.'''
+if load_dotenv():
+    print("Successfully loaded environment variables from .env")
+else:
+    print("Warning: could not load environment variables from .env")
+api_key = os.getenv("OPENAI_API_KEY")
 
-    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time.
-                     Use the tool get_current_time whenever a user asks about the time.'''
-    
-    # Step 1: start the conversation with system and user messages
-    messages = [
-        {'role': 'system', 'content': SYSTEM_PROMPT},
-        {'role': 'user', 'content': user_prompt},
+client = OpenAI()
+
+#Global Dataframe placeholder
+df = None
+
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(BASE_DIR, "assignments_01", "outputs", "merged_happiness.csv")
+print(BASE_DIR)
+print(DATA_PATH)
+
+from dotenv import load_dotenv
+import json
+import matplotlib.pyplot as plt
+import pandas as pd
+from datetime import datetime
+import re
+from pandas.api.types import is_numeric_dtype
+from scipy.stats import pearsonr
+import os
+from pathlib import Path
+from openai import OpenAI
+# smolagents imports
+from smolagents import ToolCallingAgent, OpenAIServerModel, tool
+from smolagents import CodeAgent
+
+if load_dotenv():
+    print("Successfully loaded environment variables from .env")
+else:
+    print("Warning: could not load environment variables from .env")
+api_key = os.getenv("OPENAI_API_KEY")
+
+client = OpenAI()
+
+base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+DATA_PATH = os.path.join(base, "assignments_01", "outputs", "merged_happiness.csv")
+FALLBACK_FOLDER = os.path.join(base, "assignments_01", "happiness")
+
+# Global DataFrame placeholder — must be at top level so tools can access it
+df = None
+
+
+# ------------------------------------- Pre-task --------------------------------------
+
+def file_path(FALLBACK_FOLDER):
+    file_list = []
+    for file in os.listdir(FALLBACK_FOLDER):
+        full_path = os.path.join(FALLBACK_FOLDER, file)
+        file_list.append(full_path)
+    return file_list
+
+
+def convert_list(file_list):
+    converted_list = []
+    for file in file_list:
+        # Find year in each file
+        year = re.findall(r'\d+', file)
+
+        # Pandas read csv file
+        df = pd.read_csv(file, sep=";", decimal=",")
+        # Add year to csv files
+        df['Year'] = int(year[0])
+
+        # 2024 has "Ladder score" not "Happiness score", need to modify dataframe
+        if int(year[0]) == 2024:
+            df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
+
+        # New list with created data frames
+        converted_list.append(df)
+    return converted_list
+
+
+def merge_dataframes(converted_list):
+    merged_dataframe = pd.concat(converted_list, ignore_index=True)
+    return merged_dataframe
+
+
+@tool
+def load_happiness_data() -> dict:
+    """
+    Load the CSV file from DATA_PATH into the global df.
+    First checks if DATA_PATH is a valid path. If not, falls back to FALLBACK_FOLDER
+    which contains raw data files and recreates the dataframe.
+    Returns a dict with 'shape' and 'columns' of the loaded data.
+    """
+    global df
+
+    if not os.path.exists(DATA_PATH):
+        print("Outputs not found. Attempting fallback to happiness_project folder...")
+        if not os.path.exists(FALLBACK_FOLDER):
+            return {"error": "Neither the merged file nor raw data folder was found."}
+        # FIX: assign directly to df instead of to DATA_PATH
+        file_list = file_path(FALLBACK_FOLDER)
+        converted_list = convert_list(file_list)
+        df = merge_dataframes(converted_list)
+    else:
+        df = pd.read_csv(DATA_PATH)
+
+    if len(df) == 0:
+        return {"error": "Loaded data is empty. Double check path is correct."}
+
+    return {"shape": df.shape, "columns": df.columns.tolist()}
+
+
+@tool
+def summarize_column(column: str) -> dict:
+    """
+    Return basic descriptive stats for a single column.
+    Args:
+        column: The exact name of the column to summarize.
+    """
+    if df is None:
+        return {"error": "No data loaded yet. Please run load_happiness_data first."}
+    if column not in df.columns:
+        return {"error": f"'{column}' is not a column. Options: {df.columns.tolist()}"}
+    return df[column].describe().to_dict()
+
+
+@tool
+def compute_correlation(col1: str, col2: str) -> dict:
+    """
+    Compute the Pearson correlation between two columns in the loaded DataFrame.
+    Returns col1, col2, pearson_r, and p_value in a dict.
+    Args:
+        col1: Column 1 used for the Pearson correlation.
+        col2: Column 2 used for the Pearson correlation.
+    """
+    if df is None:
+        return {"error": "No data loaded yet. Please run load_happiness_data first."}
+
+    for col in [col1, col2]:
+        if col not in df.columns:
+            return {"error": f"'{col}' is not a column. Options: {df.columns.tolist()}"}
+
+    # Clean data
+    clean_df = df[[col1, col2]].dropna()
+    corr, p = pearsonr(clean_df[col1], clean_df[col2])
+
+    return {
+        "col1": col1,
+        "col2": col2,
+        "pearson_r": round(corr, 4),
+        "p_value": round(p, 4),
+    }
+
+
+@tool
+def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
+    """
+    Return the top N countries ranked by a given column for a specific year.
+    Args:
+        column: Column name to sort values by.
+        year: Target year as an integer.
+        n: Number of top results to return.
+    """
+    if df is None:
+        return {"error": "No data loaded yet. Please run load_happiness_data first."}
+
+    if column not in df.columns:
+        return {"error": f"Column '{column}' missing. Options: {df.columns.tolist()}"}
+
+    df_filtered = df[df['Year'] == year].copy()
+    if len(df_filtered) == 0:
+        return {"error": f"No data found for year {year}."}
+
+    result = (
+        df_filtered
+        .sort_values(by=column, ascending=False)
+        .iloc[:n][['Country', column]]
+    )
+    return result.to_dict(orient='records')
+
+
+# ------------------------------------- Task 2 -------------------------------------------
+
+model = OpenAIServerModel(api_key=api_key, model_id="gpt-4o-mini")
+
+SYSTEM_PROMPT = """
+You are a data analyst assistant for the World Happiness dataset.
+Use the available tools for loading data, summarizing columns, computing correlations,
+and ranking countries.
+IMPORTANT RULES:
+- Tools return all the data you need. Use their return values directly.
+- NEVER access or reference a variable called df. It does not exist in your environment.
+- Do NOT reload data yourself with pandas after calling load_happiness_data.
+- Write Python code only for plotting or computations not covered by tools.
+- The load_happiness_data tool returns shape and columns directly. Use that return value.
+Be concise and student-friendly in your responses.
+"""
+
+agent = CodeAgent(
+    tools=[load_happiness_data, summarize_column, compute_correlation, get_top_n_countries],
+    model=model,
+    instructions=SYSTEM_PROMPT,
+    additional_authorized_imports=["pandas", "matplotlib.pyplot", "scipy.stats"],
+    max_steps=8,
+)
+
+
+# ------------------------------------- Task 3 ------------------------------------------
+
+if __name__ == "__main__":
+    queries = [
+        "Load the happiness data and tell me its shape and column names.",
+        "Summarize the happiness_score column.",
+        "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
+        "Show me the top 5 happiest countries in 2020.",
+        "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
     ]
 
-    # Step 2: first API call - the model decides whether to call a tool
-    first_response = client.chat.completions.create(
-        model='gpt-4.1-mini',
-        messages=messages,
-        tools=tools,
-        tool_choice='auto',  # model chooses whether to use a tool
-    )
-
-    print("First response received from model...")
-    print(first_response)
-    first_message = first_response.choices[0].message
-
-    # Record what the model said so far
-    messages.append(
-        {
-            'role': 'assistant',
-            'content': first_message.content,
-            'tool_calls': first_message.tool_calls,
-        }
-    )
-
-    # Step 3: check if the model requested any tools
-    if first_message.tool_calls:
-        print("Agentic mode engaged...")
-        for tool_call in first_message.tool_calls:
-            function_name = tool_call.function.name
-            # In this example we only have one tool: get_current_time
-            if function_name == 'get_current_time':
-                tool_result = get_current_time()
-            else:
-                tool_result = f'Error: unknown tool {function_name}.'
-
-            # Print for debugging so we can see what happened
-            print('Tool called:', function_name)
-            print('Tool result:', tool_result)
-
-            # Step 3b: append the tool output so the model can see it
-            messages.append(
-                {
-                    'role': 'tool',
-                    'tool_call_id': tool_call.id,
-                    'name': function_name,
-                    'content': tool_result,
-                }
-            )
-
-        # Step 4: second API call - model sees the tool result and gives final answer
-        second_response = client.chat.completions.create(
-            model='gpt-4.1-mini',
-            messages=messages,
-        )
-        print("Second response received from model...")
-        print(second_response)
-
-        final_message = second_response.choices[0].message
-        return final_message.content or ''
-    else:
-        print("No tools needed....")
-
-    # If there were no tool calls, the first response was already the final answer
-    return first_message.content or ''
-
-messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
-print(result)
-
-#Q5 
-
-messages = [{"role": "system", "content": SYSTEM_PROMPT}]
-result = run_agent_cycle(messages, "Load bike_commute.csv and compute the correlation between avg_traffic_density and avg_speed_kmh.")
-print(result)
-
-#Q6
-
-import json
-print(json.dumps(messages, indent=2, default=str))
+    for query in queries:
+        print(f"\n--- Query: {query} ---")
+        response = agent.run(query, reset=False)
+        print(response)
 
 
-#Q7 
+# ------------------------------------- Task 4 --------------------------------------
 
-@tool
-def list_csv_files() -> dict:
-    """List available CSV files in resources/.
+    # My query 1
+    # my_query_1 = "..."   # replace with your question
+    # response_1 = agent.run(my_query_1, reset=False)
+    # print(response_1)
+    # Comment: Did this trigger tool use, code generation, or both?
 
-    Returns:
-        A dict with a "files" list, or a message if none are found.
-    """
-    return csv_manager.list_csv_files()
-
-
-@tool
-def load_csv(filename: str) -> dict:
-    """Load a CSV file from resources/ and make it the active dataset.
-
-    Args:
-        filename: CSV filename in resources/. You can pass "bike_commute" or "bike_commute.csv".
-
-    Returns:
-        A dict with a status message and column names, or an error dict.
-    """
-    return csv_manager.load_csv(filename)
+    # My query 2
+    # my_query_2 = "..."   # replace with your question
+    # response_2 = agent.run(my_query_2, reset=False)
+    # print(response_2)
+    # Comment: Did this trigger tool use, code generation, or both?
 
 
-@tool
-def get_columns() -> list[str] | dict:
-    """Return column names for the currently loaded CSV.
+# -------------------------------------- Task 5 -------------------------------------
 
-    Returns:
-        A list of column names, or an error dict if no CSV is loaded.
-    """
-    return csv_manager.get_columns()
+# --- Reflection ---
 
+"""
+ 1. 
 
-@tool
-def summarize_columns(columns: list[str] | None = None) -> dict:
-    """Return summary stats for selected columns (or all columns). 
-    This includes count, mean, std, min, max, and percentiles for numeric columns,
-    or count, unique, top, freq for categorical columns.
-
-    Args:
-        columns: Column names to summarize. If None, summarizes all columns.
-
-    Returns:
-        A dict of summary statistics (from pandas.describe), or an error dict.
-    """
-    return csv_manager.summarize_columns(columns)
-
-
-@tool
-def describe_column(column: str) -> dict:
-    """Describe a single column (basic stats) for the requested column.
-    This includes count, mean, std, min, max, and percentiles for numeric column,
-    or count, unique, top, freq for categorical column.
-
-    Args:
-        column: The name of the column to describe.
-
-    Returns:
-        A dict of basic stats for the column, or an error dict.
-    """
-    return csv_manager.describe_column(column)
-
-
-@tool
-def plot_data(y: str, x: str | None = None, plot_type: str = "line") -> str | dict:
-    """Plot from the active CSV.
-
-    Args:
-        y: Column name to plot on the y-axis. 
-        x: Column name to plot on the x-axis. If None, use row index.
-        plot_type: "line" or "scatter". Scatter requires x and y.
-
-    Returns:
-        Generates and shows the plot. 
-        Retirms a short success message string, or an error dict/string.
-    """
-    return csv_manager.plot_data(y=y, x=x, plot_type=plot_type)
+"""
