@@ -128,9 +128,8 @@ def compute_correlation(col1: str, col2: str) -> dict:
         if col not in df.columns:
             return {"error": f"'{col}' is not a column. Options: {df.columns.tolist()}"}
         
-    # Clean data
-    clean_df = df[[col1, col2]].dropna()
-    corr, p = pearsonr(clean_df[col1], clean_df[col2])
+
+    corr, p = pearsonr(df[col1], df[col2])
 
     pearson_r = round(corr, 4)
     p_value = round(p, 4)
