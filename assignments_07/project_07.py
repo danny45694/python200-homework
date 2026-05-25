@@ -27,23 +27,31 @@ client = OpenAI()
 #Global Dataframe placeholder
 df = None
 
-DATA_PATH = Path.cwd().parent / "assignments_01" / "outputs" / "merged_happiness.csv"
+
+DATA_DIR = Path("assignments_01/outputs")
+DATA_PATH = DATA_DIR / "merged_happiness.csv"
+FALLBACK_FOLDER = Path("assignments_01/happiness_project")
 
 # ------------------------------------- Pre-task --------------------------------------
 
 #Created merged_happiness.csv if it doesn't exist. 
-def convert_list(folder):
+def convert_list(folder_path):
     converted_list = []
-    for file in folder:
+    for file in folder_path.glob("*.csv"):
         #Find year in each file
-        year = re.findall(r'\d+', file)
+        year = re.findall(r'\d+', file.name)
+        if not year:
+            continue
+
+        current_year = int(year[0])
+
         #Pandas read csv file
         df = pd.read_csv(file, sep = ";", decimal=",") 
         #add year to csv files
-        df['Year'] = int(year[0])
+        df['Year'] = current_year
 
     #2024 has "Ladder score" not "Happiness score", need to modify dataframe
-        if int(year[0]) == 2024:
+        if current_year == 2024:
             df.rename(columns={"Ladder score": "Happiness score"}, inplace=True)
         
         #new list with created data frames
@@ -51,32 +59,8 @@ def convert_list(folder):
     return converted_list
 
 def merge_dataframes(converted_list):
-    merged_dataframe = pd.concat(converted_list)
+    merged_dataframe = pd.concat(converted_list, ignore_index=True)
     return merged_dataframe
-
-
-    
-
-#Check for outputs existence
-def check_data_path():
-    if DATA_PATH.exists():
-        print("Outputs folder found!")
-        for file in DATA_PATH.glob("*"):
-            print(file.name)
-    else:
-        # 3. Fallback path if outputs is missing
-        folder = Path.cwd().parent / "assignments_01" / "happiness_project"
-        
-        if folder.exists():
-            print("Outputs not found. Happiness_project folder found.")
-            converted_list = convert_list(folder)
-            merged_dataframe = merge_dataframes(converted_list)
-            #Save so we can find it later
-            DATA_PATH.mkdir(parents=True, exist_ok=True)
-            merged_dataframe.to_csv(DATA_PATH / "merged_happiness.csv", index=False)
-            return merged_dataframe
-        else:
-            print("Neither folder was found.")
 
 
 @tool
@@ -90,30 +74,21 @@ def load_happiness_data() -> dict:
     global df
 
     #Checks if merged happiness csv exists. If does not, merge the base csv files to create it.
-    if DATA_PATH.exists():
-        print("Outputs folder found!")
-        for file in DATA_PATH.glob("*"):
-            print(file.name)
-    else:
-        # 3. Fallback path if outputs is missing
-        folder = Path.cwd().parent / "assignments_01" / "happiness_project"
-        
-        if folder.exists():
-            print("Outputs not found. Happiness_project folder found.")
-            converted_list = convert_list(folder)
+    if not DATA_PATH.exists():
+        print("Outputs not found. Attempting fallback to happiness_project folder...")
+        if FALLBACK_FOLDER.exists():
+            converted_list = convert_list(FALLBACK_FOLDER)
             merged_dataframe = merge_dataframes(converted_list)
-            #Save so we can find it later
-            DATA_PATH.mkdir(parents=True, exist_ok=True)
-            merged_dataframe.to_csv(DATA_PATH / "merged_happiness.csv", index=False)
-            return merged_dataframe
+            
+            DATA_DIR.mkdir(parents=True, exist_ok=True)
+            merged_dataframe.to_csv(DATA_PATH, index=False)
         else:
-            print("Neither folder was found.")
+            return {"error": "Neither the merged file nor the raw data folder was found."}
 
     df = pd.read_csv(DATA_PATH)
     if len(df) == 0:
         return {"error": "DATA_PATH is empty. Double check path is correct"}
     return {"shape": df.shape, "columns": df.columns.tolist()}
-
 
 @tool
 def summarize_column(column: str) -> dict:
@@ -134,40 +109,40 @@ def summarize_column(column: str) -> dict:
 
 @tool
 def compute_correlation(col1: str, col2: str) -> dict:
-        """
-        Compute the Pearson correlation between two columns in the loaded DataFrame using scipy.stats.pearsonr.
-        Return the col1, col2, correlation coefficient as pearson_r, and p-value in a dict.
+    """
+    Compute the Pearson correlation between two columns in the loaded DataFrame using scipy.stats.pearsonr.
+    Return the col1, col2, correlation coefficient as pearson_r, and p-value in a dict.
 
-        Args:
-            col1: Column 1 used for the Pearson correlation
-            col2: Column 2 used for the Pearson correlation
+    Args:
+        col1: Column 1 used for the Pearson correlation
+        col2: Column 2 used for the Pearson correlation
 
-            Returns:
-                 A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
-        """
+        Returns:
+                A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
+    """
 
-        if df is None:
-            return {"error": "No data loaded yet"}
+    if df is None:
+        return {"error": "No data loaded yet"}
 
-        for col in [col1, col2]:
-            if col not in df.columns:
-                return {"error": f"'{col}' is not a column. Options: {df.columns.tolist()}"}
-            
-        # Clean data
-        clean_df = df[[col1, col2]].dropna()
-        corr, p = pearsonr(clean_df[col1], clean_df[col2])
+    for col in [col1, col2]:
+        if col not in df.columns:
+            return {"error": f"'{col}' is not a column. Options: {df.columns.tolist()}"}
+        
+    # Clean data
+    clean_df = df[[col1, col2]].dropna()
+    corr, p = pearsonr(clean_df[col1], clean_df[col2])
 
-        pearson_r = round(corr, 4)
-        p_value = round(p, 4)
+    pearson_r = round(corr, 4)
+    p_value = round(p, 4)
 
 
-        result = {
-            "col1": col1,
-            "col2": col2,
-            "pearson_r": pearson_r,
-            "p_value": p_value
-        }
-        return result
+    result = {
+        "col1": col1,
+        "col2": col2,
+        "pearson_r": pearson_r,
+        "p_value": p_value
+    }
+    return result
 
 
 @tool
