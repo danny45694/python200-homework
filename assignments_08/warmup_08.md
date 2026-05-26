@@ -35,3 +35,19 @@ Developer Responsibilities (in order):
 laaS - Manage operating systems, applications and network security. 
 PaaS - code and data. Platform maintenance handled by provider.
 SaaS - User access, data governance, application configuration.
+
+Cloud Concepts Questions
+
+Q4. Snowflake offers a specialized, managed for you service. It handles the underlying structure. Azure is provides you with a generalized cloud environment. Because of those differences, Snowflake is only used for Data Warehousing, engineering and sharing. Azure allows much more flexibility in the applications hosted in exchange for having to manage setup and maintenance yourself.
+
+Q5. If dataset fits on a single machine and you don't have massive compute demands, local processing is better. The other situation where local is better is when handling highly sensitive, regulated data.
+
+Azure Basics
+
+Q1. Azure subscription is the billing account that owns all the resources in an organization. Resource group is a sandbox that bundles all your related cloud resources together. Resource group lies within the subscription.
+
+Q2. Ephemeral - Each time you close shell, everything gets deleted. To ensure it sticks around, Cloud Shell needs to be connected to file share. File share is a named storage folder in Azure.
+
+Q3. SSH operates in key pairs. They prove identity without transmitting a password. Private key stay on local machines while public key is uploaded to the systems you want access to. When connecting SSH verifies the key match, bypassing the need for a password crossing the network.
+
+Q4. Need to run a script in Azure Cloud
