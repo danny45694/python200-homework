@@ -111,14 +111,14 @@ def summarize_column(column: str) -> dict:
 def compute_correlation(col1: str, col2: str) -> dict:
     """
     Compute the Pearson correlation between two columns in the loaded DataFrame using scipy.stats.pearsonr.
-    Return the col1, col2, correlation coefficient as pearson_r, and p-value in a dict.
+    Load col1, col2, correlation coefficient as pearson_r, and p-value as keys in a dict. Return the dict
 
     Args:
         col1: Column 1 used for the Pearson correlation
         col2: Column 2 used for the Pearson correlation
 
-        Returns:
-                A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
+    Returns:
+            A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
     """
 
     if df is None:
@@ -217,19 +217,19 @@ if __name__ == "__main__":
 # ------------------------------------- Task 4 --------------------------------------
 
 
-"""
+
     # My query 1
-    my_query_1 = "..."   # replace with your question
+    my_query_1 = "Show me the unhappiest countries in 2020"   # replace with your question
     response_1 = agent.run(my_query_1, reset=False)
     print(response_1)
     # Comment: Did this trigger tool use, code generation, or both?
 
     # My query 2
-    my_query_2 = "..."   # replace with your question
+    my_query_2 = "When year was mean happiness highest? What year was mean happiness lowest?"   
     response_2 = agent.run(my_query_2, reset=False)
     print(response_2)
     # Comment: Did this trigger tool use, code generation, or both?
-"""
+
 
 
 
@@ -239,7 +239,7 @@ if __name__ == "__main__":
 # --- Reflection ---
 
 """
- 1. 
+ 1. Agent says the correlation is statistically significant. P-value has a value of 0 so it appears it was not used correctly.
 
 """
 
