@@ -25,7 +25,7 @@ df = None
 base = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 DATA_PATH = os.path.join(base, "assignments_01", "outputs", "merged_happiness.csv")
 
-FALLBACK_FOLDER = os.path.join(base, "assignments_01", "happiness")
+FALLBACK_FOLDER = os.path.join(base, "assignments_01", "happiness_project")
 
 # ------------------------------------- Pre-task --------------------------------------
 
@@ -239,7 +239,7 @@ if __name__ == "__main__":
 # --- Reflection ---
 
 """
- 1. Agent says the correlation is statistically significant. P-value has a value of 0 so it appears it was not used correctly.
+ 1. Agent says the correlation is statistically significant. P-value has a value of 0 so it appears it was not used correctly. 
 
 """
 
