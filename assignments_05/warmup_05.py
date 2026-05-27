@@ -165,7 +165,7 @@ reviews = [
 
 prompt = """
 
-Look at each review in the label it if it is positive, negative or mixed. Print each result labeled with the review number
+Look at each review and label it as positive, negative or mixed. Print each result labeled with the review number.
 
 reviews = [
     "The onboarding process was smooth and the team was welcoming.",
@@ -224,8 +224,47 @@ print(response.choices[0].message.content)
 
 
 #Q3
+print("Q3")
+
+prompt_q3 = """
+
+Look at each review and label it as positive, negative or mixed. Print each result labeled with the review number.
+
+Here are some examples for you:
+
+three_examples = [
+
+Example 1: 
+Review: "AMD gpus are top-notch!"
+Sentiment: positive
+
+Example 2:
+Review: "Nvidia gpus are great but very pricy when compared to AMD"
+Sentiment: mixed
+
+Example 3:
+Review: "Integrated graphics are the worst option available!"
+Sentimenet: negative
+
+reviews = [
+    "The onboarding process was smooth and the team was welcoming.",
+    "The software crashes constantly and support never responds.",
+    "Great price, but the documentation is nearly impossible to follow."
+]
+"""
+
+messages = [
+    {"role": "user", "content": prompt_q3}
+]
 
 
+response = client.chat.completions.create(
+model="gpt-4o-mini",
+messages= messages
+)
+print(response.choices[0].message.content)
+
+#
 
 #Q4
 
