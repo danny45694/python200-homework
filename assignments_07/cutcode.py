@@ -73,6 +73,5 @@ def load_happiness_data():
     print(f"test: {df}")
     return {"shape": df.shape, "columns": df.columns.tolist()}
 
-load_happiness_data()
+print(load_happiness_data())
 
-print(df)

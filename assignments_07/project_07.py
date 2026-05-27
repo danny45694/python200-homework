@@ -67,12 +67,15 @@ def merge_dataframes(converted_list):
 @tool
 def load_happiness_data() -> dict:
     """
-    Load the csv file from DATA_PATH, generates a dataframe and stores it in global "df" variable.  
+    Loads the happiness dataset CSV into the global dataframe variable used by all other tools.
+    Must be called first before any other tool is used.
+    All other tools depend on this being called first. 
+    This tool already returns a dict with 'shape' (tuple of rows, columns) and 'columns' (list of column names). No code required for print df.shape and df.columns.
 
-    Args:
-        path_str: String path to the CSV dataset file.
-
+    Returns:
+        A dict with 'shape' (tuple of rows, columns) and 'columns' (list of column names).
     """
+
     global df
     global base
     global DATA_PATH
@@ -93,6 +96,7 @@ def load_happiness_data() -> dict:
         return {"error": "DataFrame has issue. Double check path is correct"}
     return {"shape": df.shape, "columns": df.columns.tolist()}
 
+
 @tool
 def summarize_column(column: str) -> dict:
 
@@ -101,7 +105,6 @@ def summarize_column(column: str) -> dict:
     Args:
         column: The exact name of the column to summarize. 
     """
-
     if df is None:
         return {"error": "No data loaded yet. Please run load_happiness_data first."}
     if column not in df.columns:
@@ -123,7 +126,6 @@ def compute_correlation(col1: str, col2: str) -> dict:
     Returns:
             A dict with col1, col2, pearson_r, and p_value as keys and their respective values.
     """
-
     if df is None:
         return {"error": "No data loaded yet"}
 
@@ -135,7 +137,7 @@ def compute_correlation(col1: str, col2: str) -> dict:
     corr, p = pearsonr(df[col1], df[col2])
 
     pearson_r = round(corr, 4)
-    p_value = f"{p: .4f}" if p >
+    p_value = round(p, 4)
 
 
     result = {
@@ -149,13 +151,12 @@ def compute_correlation(col1: str, col2: str) -> dict:
 
 @tool
 def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
-    """Return the top N countries ranked by a given column for a specific year.
+    """Return the top N countries ranked by a given column for a specific year. 
     Args:
         column: Column name to sort values by.
         year: Target year as an integer.
         n: Number of top results to return.
     """
-
     if df is None:
         return {"error": "No data loaded yet. Please run load_happiness_data first."}
     
@@ -184,7 +185,7 @@ You are a data analyst assistant for the World Happiness dataset.
 Use the available tools for loading data, summarizing columns, computing correlations,
 and ranking countries. Write Python code directly only when the tools are not sufficient
 (for example, when creating custom plots or computing something the tools don't cover).
-Be concise and student-friendly in your responses.
+Be concise and student-friendly in your responses. Provide text-string responses.
 """
 
 agent = CodeAgent(
@@ -202,15 +203,14 @@ if __name__ == "__main__":
 
 # ------------------------------------- Task 3 ------------------------------------------
 
-
     queries = [
-    "Load the happiness data and tell me its shape and column names.",
-    "Summarize the happiness_score column.",
-    "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
-    "Show me the top 5 happiest countries in 2020.",
-    "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
+        "Provide all of the following queries as a text string explanation, do not pass a dictionary object to final_answer.",
+        "Load the happiness data and tell me its shape and column names.",
+        "Summarize the happiness_score column.",
+        "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
+        "Show me the top 5 happiest countries in 2020.",
+        "Plot happiness_score over the years as a line chart, with one line per region. Save the plot to outputs/happiness_by_region.png.",
     ]
-
 
     for query in queries:
         print(f"\n--- Query: {query} ---")
@@ -222,16 +222,16 @@ if __name__ == "__main__":
 
 
     # My query 1
-    my_query_1 = "Show me the unhappiest countries in 2020"   # replace with your question
+    my_query_1 = "Show me the countries with top 5 unhappiest countries."
     response_1 = agent.run(my_query_1, reset=False)
     print(response_1)
-    # Comment: Did this trigger tool use, code generation, or both?
+    # Comment: The AI created code
 
     # My query 2
-    my_query_2 = "When year was mean happiness highest? What year was mean happiness lowest?"   
+    my_query_2 = "When year was mean happiness highest"   
     response_2 = agent.run(my_query_2, reset=False)
     print(response_2)
-    # Comment: Did this trigger tool use, code generation, or both?
+    # Comment: The AI created code.
 
 
 
@@ -242,7 +242,11 @@ if __name__ == "__main__":
 # --- Reflection ---
 
 """
- 1. Agent says the correlation is statistically significant. P-value has a value of 0 so it appears it was not used correctly. 
+ 1. Agent says the correlation is statistically significant. Stated the correlation score, the p-value and stated if it was significant. 
+
+ 2. The AI consistently required hand-holding and troubleshooting to output what I needed it to do. Really contemplated just giving it the answer and outputting that. Examples: wrote load_happiness stores data into the global df. Proceeds to try to access the file itself. I tell it to run load_happiness first, it will load the df for the other tools. Proceeds to try loading df again. Finally, after everything, instead of giving observations, it loads the dictionary to final_answer({}), which causes the agent to return an empty/unreadable object. 
+
+3.  Place the AI and files into an isolated environment with os or pathlib. That would probably help it access the files it needs as the CodeAgent seems more of a DIY type of AI.
 
 """
 
