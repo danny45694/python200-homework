@@ -51,3 +51,22 @@ Q2. Ephemeral - Each time you close shell, everything gets deleted. To ensure it
 Q3. SSH operates in key pairs. They prove identity without transmitting a password. Private key stay on local machines while public key is uploaded to the systems you want access to. When connecting SSH verifies the key match, bypassing the need for a password crossing the network.
 
 Q4. Need to run a script in Azure Cloud
+
+daniel [ ~/clouddrive ]$ az account show
+{
+  "environmentName": "AzureCloud",
+  "homeTenantId": "0f040ddd-301f-4665-8677-7b21f129d605",
+  "id": "4e07c58c-751e-4765-b40c-632b9ee6fe6e",
+  "isDefault": true,
+  "managedByTenants": [],
+  "name": "CTD Nonprofit Sponsorship",
+  "state": "Enabled",
+  "tenantId": "0f040ddd-301f-4665-8677-7b21f129d605",
+  "user": {
+    "cloudShellID": true,
+    "name": "live.com#danieladiazop@gmail.com",
+    "type": "user"
+  }
+}
+
+
