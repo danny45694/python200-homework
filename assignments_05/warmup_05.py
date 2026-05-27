@@ -270,6 +270,9 @@ print(response.choices[0].message.content)
 
 prompt_q4 = """
 Solve the following problem. Solve the problem step by step, explaining your logic along the way. Label the final answer clearly.
+
+Problem = A data engineer earns $85,000 per year. She gets a 12% raise, then 6 months later, takes a new job that pays $7,500 more per year than her post-raise salary.
+What is her final annual salary?
 """
 
 messages = [
@@ -283,25 +286,25 @@ messages= messages
 )
 print(response.choices[0].message.content)
 
-# Asking forces the AI to break down complex tasks into smaller, manageable parts. It is technique known as Chain-of-Thought prompting.
-
-
+# Asking forces the AI to break down complex tasks into smaller, manageable parts. It is technique known as Chain-of-Thought prompting. When using this technique, the AI is more meticulous in performing each step in sequence, often resulting in more accurate responses. Same with humans, taking a big problem and breaking it down into smaller steps is efficient and effective at solving the underlying problem.
 
 
 #Q5
+
+print("Q5")
 
 import json
 
 prompt_q5 = """
 
-analyze the review below and return the result only as valid JSON with keys sentiment, confidence (a float from 0 to 1), and reason (one sentence). Print the raw response.
+analyze the review below and return the result only as valid JSON with keys sentiment, confidence (a float from 0 to 1), and reason (one sentence). Print the raw response. After, parse the response with json.loads() and print each field separately, labeled.
 
 
 review = "I've been using this tool for three months. It handles large datasets well, \
 but the UI is clunky and the export options are limited."
 """
 
-"""
+
 messages = [
     {"role": "user", "content": prompt_q5}
 ]
@@ -313,12 +316,15 @@ messages= messages
 )
 
 try:
-        result = json.loads(response)
-        print("Parsed sentiment:", result["sentiment"])
-        print("Confidence:", result["confidence"])
+    result = json.loads(response.choices[0].message.content)
+    parsed_response = json.loads(response)
+    print(f"sentiment: {parsed_response['sentiment']}")
+    print(f"confidence: {parsed_response['confidence']}")
+    print(f"reason: {parsed_response['reason']}")
 except json.JSONDecodeError:
         print("Error: response was not valid JSON")
-"""
+        print(response.choices[0].message.content)
+
 
 
 #6
