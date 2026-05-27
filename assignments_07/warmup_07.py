@@ -179,11 +179,11 @@ I was correct. The AI did not call the tool because it is not programmed to use 
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
 
-# Tool was called.
+# Tool was called. Tool was used to convert the Celsius value provided to Fahrenheit. 
 
 response_b = run_agent("What is the boiling point of water in plain English?")
 print("Response B:", response_b)
-
+# No tool was used. The boiling point of supposedly common knowledge.
 
 
 
