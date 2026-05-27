@@ -19,6 +19,9 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 client = OpenAI()
 
+
+
+
 #Global Dataframe placeholder
 df = None
 
@@ -86,8 +89,8 @@ def load_happiness_data() -> dict:
     
 
     df = pd.read_csv(DATA_PATH)
-    if len(df) == 0:
-        return {"error": "DATA_PATH is empty. Double check path is correct"}
+    if df.empty:
+        return {"error": "DataFrame has issue. Double check path is correct"}
     return {"shape": df.shape, "columns": df.columns.tolist()}
 
 @tool
@@ -132,7 +135,7 @@ def compute_correlation(col1: str, col2: str) -> dict:
     corr, p = pearsonr(df[col1], df[col2])
 
     pearson_r = round(corr, 4)
-    p_value = round(p, 4)
+    p_value = f"{p: .4f}" if p >
 
 
     result = {
