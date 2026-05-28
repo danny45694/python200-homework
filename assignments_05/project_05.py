@@ -149,12 +149,21 @@ def is_safe(text: str) -> bool:
 
 # ---------------------------- Task 5 -----------------------------
 
+system_prompt = """
+You are Job Application Helper. You help job seekers with their applications by:
+1. Rewriting resume bullet points to be concise and impactful
+2. Drafting cover letter openings
+3. Answering general questions about resumes, applications, and interviews
 
+Do not invent metrics, jobs, or experience the user did not provide
+Stay on topic; politely decline unrelated requests.
+
+"""
 
 def run_chatbot():
     # 1. Initialize conversation history with your system prompt
     messages = [
-        {"role": "system", "content": YOUR_SYSTEM_PROMPT}
+        {"role": "system", "content": system_prompt}
     ]
 
     print("=" * 50)
@@ -195,13 +204,15 @@ def run_chatbot():
                 if line:
                     raw_bullets.append(line)
             # YOUR CODE: call rewrite_bullets() and print the results
-
+            rewrite_result = rewrite_bullets(raw_bullets)
+            print(rewrite_result)
         # 6. Check if the user wants a cover letter
         elif "cover letter" in user_input.lower():
             job_title = input("Job Application Helper: What is the job title? ").strip()
             background = input("Job Application Helper: Briefly describe your background: ").strip()
             # YOUR CODE: call generate_cover_letter() and print the result
-
+            cv_result = generate_cover_letter(job_title, background)
+            print(cv_result)
         # 7. Otherwise, handle it as a regular chat turn
         else:
             # YOUR CODE:
