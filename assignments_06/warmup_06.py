@@ -11,9 +11,11 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 # ----------------------------------- RAG Concepts --------------------------------------
 
-#Q1
+# Concepts Q1
 
-"""
+
+
+concepts_q1 = """
 
 Scene A: 
 RAG would be best for this situation. With an ever changing database, RAG is much easier to implement and change each time. Fine-tuning is too expensive for something that will change in 3 months and prompt engineering will blow the context window.
@@ -26,19 +28,24 @@ Simple prompt engineering would work here. It is faster to paste the documents i
 
 """
 
+print(concepts_q1)
 
-#Q2
+
+# Concepts Q2
+
+concepts_q2 = """
+
+The reason confidently wrong answers are more harmful than saying "I am not sure" is because humans are attracted to confidence. Something may not be particularly good for us, but if you say it with such confidence, you can get someone to believe in your answer. The problem is AI does not grasp logic and unable to take accountability. 
+
+Asking AI something like health advice can have very bad consequences because it will not grasp all the variables and it can hallucinate. The web surfing capability does not help either as there is a vast amount of misinformation on the internet already. 
 
 """
 
-AI hallucinations can have very drastic consequences. Because they produce output with so much confidence, it is easier for a user to take the output at face value vs doing their own research. One recent example is Delotte. They provided a report where the AI cited false citations. The Canadian government spent around $1.6 million on the report. No bueno
+print(concepts_q2)
 
-"""
+# Concepts Q3
 
 
-#Q3
-
-"""
 steps = [
     "Extract text from source documents",
     "Split text into chunks",
@@ -50,8 +57,27 @@ steps = [
     "Generate a response from the LLM",
 ]
 
-"""
 
+"""
+steps explained in order:
+
+Text extraction - AI reviews the documentation and extracts text from it
+
+Split text - AI breaks down the text into smaller portions. Allows efficient search and retrieval.
+
+Convert text - The Chunks are transformed into vector embeddings (list of numbers unique to the chunk)
+
+Receive User query - Get user's query
+
+Embed user query - transform user query into vector embedding.
+
+Retrieve relevant chunks - similarity score is used to retrieve the context based on number of word matches. 
+
+Inject retrieved chunks - AI then passes the relevant chunks back to the llm so it can generate a response.
+
+Generate a response - LLM reviews the underlying information and then responds to the users query/prompt.
+
+"""
 
 
 # --------------------------------- Keyword RAG -------------------------------------
@@ -102,7 +128,7 @@ def simple_keyword_retrieval(query, documents, verbose=True):
         return [("None found", "No relevant content.")]
     
 
-#query = "What are your hours on the weekend?"
+query = "What are your hours on the weekend?"
 
 documents = {
     "menu.txt": "We serve espresso, lattes, cappuccinos, and cold brew. Pastries include croissants and muffins baked fresh daily. Oat milk and almond milk are available.",
@@ -112,7 +138,7 @@ documents = {
 }
 
 
-#simple_keyword_retrieval(query, documents, verbose=True)
+simple_keyword_retrieval(query, documents, verbose=True)
 
 # Loyalty.txt was selected. The query is looking for 'your'.
 

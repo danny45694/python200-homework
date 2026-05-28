@@ -22,7 +22,8 @@ assert docs_dir.exists(), f"Document directory not found: {docs_dir}"
 docs = SimpleDirectoryReader("groundwork_docs", filename_as_id= True).load_data()
 index = VectorStoreIndex.from_documents(docs)
 
-print(docs[0])
+print(len(docs))
+
 # Step 3: Build the Index and Query Engine
 
 query_engine = index.as_query_engine(similarity_top_k=3)
@@ -51,7 +52,7 @@ for q in questions:
         print(f"Source Document: {file_name}")
         print(f"Node ID: {node_with_score.node.node_id}")
         print(f"Similarity Score: {node_with_score.score:.4f}")
-        print(f"Text Snippet: {node_with_score.node.get_content()[:100]}...")
+        print(f"Text Snippet: {node_with_score.node.get_content()[:200]}...")
         print("-" * 30)
 
 # The assistant sounds confident and self assured. None of the answers surprised me.
