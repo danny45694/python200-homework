@@ -317,7 +317,7 @@ messages= messages
 print("Raw response:", response)
 
 try:
-    result = json.loads(response)
+    result = json.loads(response.choices[0].message.content)
     print("Parsed sentiment:", result["sentiment"])
     print("Confidence:", result["confidence"])
 except json.JSONDecodeError:

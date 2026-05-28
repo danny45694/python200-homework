@@ -60,8 +60,10 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
 
     try:
         result = json.loads(response)
-        print("original:", result["original"])
-        print("improved:", result["improved"])
+        for item in result:
+            print(f"original:, {item["original"]}")
+            print(f"improved:, {item["improved"]}")
+        return result
     except json.JSONDecodeError:
         print("Error: response was not valid JSON")
 
@@ -75,7 +77,7 @@ rewrite_bullets(bullets)
 def generate_cover_letter(job_title: str, background: str) -> str:
     prompt = f"""
     You write strong cover letter opening paragraphs for career changers.
-    The paragraph should be 3-5 sentences: confident, specific, and free of clichés.
+    The paragraph should be 3-5 sentences: confident, specific, and free of clichés. Do not invent credentials the user didn't mention.
 
     Here are two examples of the style and tone you should match:
 
@@ -109,27 +111,15 @@ def generate_cover_letter(job_title: str, background: str) -> str:
     
     response = get_completion(messages)
     print("Raw response:", response)
+    return response
 
-    try:
-        result = json.loads(response)
-        for item in result:
-            print(f"  Original : {item['original']}")
-            print(f"  Improved : {item['improved']}")
-    except json.JSONDecodeError:
-        print("Error: response was not valid JSON")
+job_title = "Junior Data Engineer"
 
-
-
-
-
-    job_title = "Junior Data Engineer"
-    background = "Five years of experience as a middle school math teacher; recently completed \
+background = "Five years of experience as a middle school math teacher; recently completed \
     a Python course and built data pipelines using Prefect and Pandas."
 
-    messages = [{"role": "user", "content": prompt}]
-    response = get_completion(messages)
-    return response
- 
+
+print(generate_cover_letter(job_title, background))
 
 # ------------------------------- Task 4 -----------------------------
 
