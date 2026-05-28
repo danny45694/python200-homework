@@ -60,8 +60,8 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
 
     try:
         result = json.loads(response)
-        print("Parsed sentiment:", result["sentiment"])
-        print("Confidence:", result["confidence"])
+        print("original:", result["original"])
+        print("improved:", result["improved"])
     except json.JSONDecodeError:
         print("Error: response was not valid JSON")
 
@@ -115,7 +115,6 @@ def generate_cover_letter(job_title: str, background: str) -> str:
         for item in result:
             print(f"  Original : {item['original']}")
             print(f"  Improved : {item['improved']}")
-            print()
     except json.JSONDecodeError:
         print("Error: response was not valid JSON")
 
