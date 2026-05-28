@@ -297,8 +297,7 @@ import json
 
 prompt_q5 = """
 
-analyze the review below and return the result only as valid JSON with keys sentiment, confidence (a float from 0 to 1), and reason (one sentence). Print the raw response. After, parse the response with json.loads() and print each field separately, labeled.
-
+Analyze the review below and respond ONLY with valid JSON. Keys: Sentiment (positive/negative/mixed), confidence(a float from 0 to 1), and reason(one sentence).
 
 review = "I've been using this tool for three months. It handles large datasets well, \
 but the UI is clunky and the export options are limited."
@@ -315,21 +314,18 @@ model="gpt-4o-mini",
 messages= messages
 )
 
-try:
-    result = json.loads(response.choices[0].message.content)
-    parsed_response = json.loads(response)
-    print(f"sentiment: {parsed_response['sentiment']}")
-    print(f"confidence: {parsed_response['confidence']}")
-    print(f"reason: {parsed_response['reason']}")
-except json.JSONDecodeError:
-        print("Error: response was not valid JSON")
-        print(response.choices[0].message.content)
+print("Raw response:", response)
 
+try:
+    result = json.loads(response)
+    print("Parsed sentiment:", result["sentiment"])
+    print("Confidence:", result["confidence"])
+except json.JSONDecodeError:
+    print("Error: response was not valid JSON")
+    print("Raw Response:", response)
 
 
 #6
-
-
 
 user_text = "First boil a pot of water. Once boiling, add a handful of salt and the \
 pasta. Cook for 8-10 minutes until al dente. Drain and toss with your sauce of choice."
