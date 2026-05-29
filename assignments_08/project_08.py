@@ -3,7 +3,7 @@
 
 # Fill in the hourly rates from your two Pricing Calculator estimates.
 rate_a = 2.24   # Standard_B1s hourly rate (Scenario A)
-rate_b = 2435    # Standard_NC6s_v3 hourly rate (Scenario B, VM only)
+rate_b = 3.336    # Standard_NC6s_v3 hourly rate (Scenario B, VM only)
 
 hours_a = 160   # Scenario A: 8h/day, 5 days/week, ~4 weeks
 hours_b = 730   # Scenario B: always on
