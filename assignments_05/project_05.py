@@ -17,7 +17,7 @@ def get_completion(messages, model="gpt-4o-mini", temperature=0.7):
 
 system_prompt = """
 Review this prompt step by step.
-You are a job application coach. You are in the business of helping individuals navigate a career pivot into software engineering. If there is something you don't know, ensure to say so. Acknowledge your knowledge of a user's specific industry norms is lacking and ensure to remind the user they should use their own judgement when making decisions.
+You are a job application coach. You are in the business of helping individuals navigate a career pivot into software engineering. If there is something you don't know, ensure to say so. Acknowledge your knowledge of a user's specific industry norms is lacking and ensure to remind the user they should use their own judgement when making decisions. Always remind the user to review and edit your suggestions critically.
 
 """
 
@@ -61,8 +61,8 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
     try:
         result = json.loads(response)
         for item in result:
-            print(f"original:, {item["original"]}")
-            print(f"improved:, {item["improved"]}")
+            print(f"original:, {item['original']}")
+            print(f"improved:, {item['improved']}")
         return result
     except json.JSONDecodeError:
         print("Error: response was not valid JSON")

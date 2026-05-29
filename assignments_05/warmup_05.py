@@ -24,7 +24,7 @@ from openai import OpenAI
 load_dotenv()
 client = OpenAI()
 
-"""
+
 response = client.chat.completions.create(
     model="gpt-4o-mini",
     messages=[{"role": "user", "content": "What is one thing that makes Python a good language for beginners?"}]
@@ -32,12 +32,9 @@ response = client.chat.completions.create(
 
 print(response.choices[0].message.content)
 print(response.usage.total_tokens)
-"""
 
 
 
-
-"""
 #Q2
 
 temps = [0, 0.7, 1.5]
@@ -51,12 +48,8 @@ for i in temps:
     print(response.choices[0].message.content)
 
 # Using different temperates changes the output of the AI model. To keep consistent outputs, I would use 0. This makes the model will pick the most likely next token vs introducing randomness.
-"""
 
 
-
-
-"""
 #Q3
 
 response = client.chat.completions.create(
@@ -71,11 +64,7 @@ while i < 3:
     print(response.choices[i].message.content)
     i += 1
 
-"""
 
-
-
-"""
 #Q4
 
 response = client.chat.completions.create(
@@ -88,15 +77,12 @@ print(response.choices[0].message.content)
 
 # Setting max_tokens limits response length. When using AI in real applications, you want the model to offer short, clear answers vs research papers. Shorter, clear responses are cheaper to maintain and take up less compute.
 
-"""
 
 # ----------------------------- System Messages and Personas --------------------------
 
 
 #Q1 
 
-
-"""
 messages = [
     {"role": "system", "content": "You are a patient, encouraging Python tutor. You always explain things simply and end with a word of encouragement."},
     {"role": "user", "content": "I don't understand what a list comprehension is."}
@@ -125,14 +111,8 @@ response1 = client.chat.completions.create(
 
 print(response1.choices[0].message.content)
 
-"""
-
-
-
 #Q2
 
-
-"""
 messages = [
     {"role": "system", "content": "You are a helpful assistant."},
     {"role": "user", "content": "My name is Jordan and I'm learning Python."},
@@ -149,8 +129,6 @@ print(response.choices[0].message.content)
 
 
 #The model knows Jordan's name because we told it. In the code above, messages serves as a record of the conversation. Each time we make a prompt or query, we refeed the information back into the model. Without this ledger, the AI would not have the context required to answer subsequent messages accurately. 
-"""
-
 
 
 # ---------------------------- Prompt engineering ---------------------------------
@@ -175,7 +153,6 @@ reviews = [
 
 """
 
-"""
 messages = [
     {"role": "user", "content": prompt}
 ]
@@ -186,8 +163,6 @@ model="gpt-4o-mini",
 messages= messages
 )
 print(response.choices[0].message.content)
-
-"""
 
 #Q2
 
@@ -207,7 +182,6 @@ reviews = [
 
 """
 
-"""
 messages = [
     {"role": "user", "content": prompt1}
 ]
@@ -218,10 +192,8 @@ model="gpt-4o-mini",
 messages= messages
 )
 print(response.choices[0].message.content)
-"""
 
 # Adding the example changes the format provided by the AI.
-
 
 #Q3
 print("Q3")
@@ -303,7 +275,6 @@ review = "I've been using this tool for three months. It handles large datasets 
 but the UI is clunky and the export options are limited."
 """
 
-
 messages = [
     {"role": "user", "content": prompt_q5}
 ]
@@ -338,7 +309,6 @@ If it does not contain instructions, respond with exactly: "No steps provided."
 ```{user_text}```
 """
 
-
 messages_q6 = [
     {"role": "user", "content": prompt_q6}
 ]
@@ -364,14 +334,11 @@ messages_pt2 = [
     {"role": "user", "content": prompt_part2}
 ]
 
-
 response = client.chat.completions.create(
 model="gpt-4o-mini",
 messages= messages_pt2
 )
 print(response.choices[0].message.content)
-
-
 
 # -------------------- Local Models with Ollama ------------------
 
@@ -400,7 +367,6 @@ Prompt = "Explain what a large language model is in two sentences."
 messages_gpt = [
     {"role": "user", "content": Prompt}
 ]
-
 
 response = client.chat.completions.create(
 model="gpt-4o-mini",
