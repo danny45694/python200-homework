@@ -28,8 +28,6 @@ Simple prompt engineering would work here. It is faster to paste the documents i
 
 """
 
-print(concepts_q1)
-
 
 # Concepts Q2
 
@@ -40,8 +38,6 @@ The reason confidently wrong answers are more harmful than saying "I am not sure
 Asking AI something like health advice can have very bad consequences because it will not grasp all the variables and it can hallucinate. The web surfing capability does not help either as there is a vast amount of misinformation on the internet already. 
 
 """
-
-print(concepts_q2)
 
 # Concepts Q3
 
@@ -57,8 +53,8 @@ steps = [
     "Generate a response from the LLM",
 ]
 
-
 """
+
 steps explained in order:
 
 Text extraction - AI reviews the documentation and extracts text from it
@@ -83,7 +79,6 @@ Generate a response - LLM reviews the underlying information and then responds t
 # --------------------------------- Keyword RAG -------------------------------------
 
 import string
-
 
 
 def simple_keyword_retrieval(query, documents, verbose=True):
@@ -142,34 +137,54 @@ simple_keyword_retrieval(query, documents, verbose=True)
 
 # Loyalty.txt was selected. The query is looking for 'your'.
 
+"""
+AI output
+
+Query tokens (filtered): ['hours', 'weekend', 'what', 'your']
+[menu.txt] overlap=0 -> []
+[hours.txt] overlap=0 -> []
+[hiring.txt] overlap=1 -> ['your']
+[loyalty.txt] overlap=1 -> ['your']
+
+Selected best match: loyalty.txt
+
+"""
+
 
 # Keyword Question 2
 
-"""
 query = "Do you have anything without caffeine?"
 simple_keyword_retrieval(query, documents, verbose=True)
+
+print(simple_keyword_retrieval)
+
+
 """
 
-
+ No document was selected. 
+ A keyword rag system would fail here.
+ Semantic would work far better here. Converting the text into its semantic meaning and searching for that allows it to return relevant information the user is looking for.
 
 """
- No document was selected. It technically got it right. Source documents do not list anything without caffeine.
-"""
-
 
 # Keyword Question 3
 
-
-"""
 query = "How do I sign up for rewards?"
 
-# It will return nothing. There are no content matches
+"""
+It will return nothing. Keyword rag will fail here. If it does return something, it will likely be on the non-essential words in the query like do and for.
+The phrase search is exact. Does not derive meaning, just word text.
+
+Prediction was correct. Since the documentation does not have the exact wording, it found no overlap and returned nothing.
+
+"""
+
 
 simple_keyword_retrieval(query, documents, verbose=True)
 
 # I was right. No keywords matches so the model returned nothing.
 
-"""
+
 
 # --------------------------------- Semantic RAG Concepts -----------------------------
 
