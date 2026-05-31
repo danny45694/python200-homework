@@ -1,4 +1,5 @@
-
+from azure.storage.blob import ContainerClient
+from azure.identity import DefaulyAzureCredential
 
 
 # ------------------------------ Azure Authentication ---------------------------------
@@ -74,22 +75,19 @@ blob - Individual files. Stored by name. They are stored in bytes. You have to e
 
 #Q3
 
+def list_container(container_client: ContainerClient) -> None:
+    
+    blob_list = container_client.list_blobs()
+    for blob in blob_list:
+        print(f"{blob.name} - {blob.size} ")
+
 
 #Q4
 
 def upload_text(container_client, blob_name, text):
 
-    payload = json.dumps(blob_name).encode("utf-8")
-
-    credential = DefaultAzureCredential()
-    container = ContainerClient(
-        account_url="https://<account>.blob.core.windows.net",
-        container_name="pipeline-data",
-        credential=credential
-    )
-
-
-    container.upload_blob(blob_path, payload, overwrite=True)
-    print(f"Uploaded to {blob_path}")
+    data_bytes = text.encode('utf-8')
+    blob_client = container_client.get_blob_client(blob_name)
+    blob_client.upload_blob(data_bytes, overwrite=True)
 
     return None
