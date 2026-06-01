@@ -4,7 +4,7 @@ import io
 import pandas as pd
 from azure.storage.blob import ContainerClient
 from azure.identity import DefaultAzureCredential
-from azure.mgmt.resource import SubscriptionClient
+from azure.mgmt.resource.subscriptions import SubscriptionClient
 from datetime import date
 
 
