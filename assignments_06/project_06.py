@@ -24,6 +24,9 @@ index = VectorStoreIndex.from_documents(docs)
 
 print(len(docs))
 
+for doc in docs:
+    print(doc.doc_id)
+
 # Step 3: Build the Index and Query Engine
 
 query_engine = index.as_query_engine(similarity_top_k=3)
