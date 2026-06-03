@@ -83,12 +83,8 @@ def generate_cover_letter(job_title: str, background: str) -> str:
 
     Example 1:
     Role: Data Analyst at a healthcare nonprofit
-    Background: Seven years as a registered nurse, recently completed a data analytics bootcamp.
-    Opening: After seven years as a registered nurse, I've spent my career making decisions
-    under pressure using incomplete information — which turns out to be excellent training for
-    data analysis. I recently completed a data analytics program where I built dashboards
-    tracking patient outcomes across departments. I'm excited to bring that combination of
-    clinical context and technical skill to [Company]'s mission-driven work.
+    Background: Eight years as a supply chain professional, recently completed Code the Dream AI and cloud engineering course.
+    Opening: After eight years as a supply chain professional, I have developed a love for problem-solving and system optimization. Making critical decisions that can drastically affect the bottom line has enriched my judgement and problem solving skills. One day, while looking for ways to automate/streamlline my current work, I stumbled upon programming. In 2023, I started taking the odin project and fell in love. I have learning how to program ever since.  I'm excited to bring my operational knowledge and supplier management skills to [company]'s mission-driven work.
 
     Example 2:
     Role: Junior Software Engineer at a fintech startup
