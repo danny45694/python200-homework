@@ -82,19 +82,21 @@ def generate_cover_letter(job_title: str, background: str) -> str:
     Here are two examples of the style and tone you should match:
 
     Example 1:
-    Role: Data Analyst at a healthcare nonprofit
-    Background: Eight years as a supply chain professional, recently completed Code the Dream AI and cloud engineering course.
-    Opening: After eight years as a supply chain professional, I have developed a love for problem-solving and system optimization. Making critical decisions that can drastically affect the bottom line has enriched my judgement and problem solving skills. One day, while looking for ways to automate/streamlline my current work, I stumbled upon programming. In 2023, I started taking the odin project and fell in love. I have learning how to program ever since.  I'm excited to bring my operational knowledge and supplier management skills to [company]'s mission-driven work.
+    Role: Procurement Specialist at a Food Manufacturing company
 
-    Example 2:
-    Role: Junior Software Engineer at a fintech startup
-    Background: Ten years in retail banking operations, self-taught Python developer for two years.
-    Opening: I spent a decade on the operations side of banking, watching technology decisions
-    get made by people who had never processed a wire transfer or resolved a failed ACH batch.
-    That frustration turned into curiosity, and two years of self-teaching Python later, I'm
-    ready to be on the other side of those decisions. I'm applying to [Company] because your
-    work on payment infrastructure is exactly where my domain expertise and new technical skills
-    intersect.
+    Background: Eight years of supply chain experience, supplemented by self-directed software development training (The Odin Project).
+
+    Opening:
+
+    "After eight years in supply chain operations, I've built a career around solving complex problems and protecting the bottom line. My transition into tech started when I began looking for ways to automate the repetitive parts of my procurement workflow so I could focus on high-level strategy. That curiosity led me to programming, and I've spent the last few years rigorously learning development through The Odin Project. I’m eager to bring this unique combination of operational grit, supplier management expertise, and technical problem-solving to [Company]’s team."
+
+    Role: Junior Software Engineer (Backend / Data Integration)
+
+    Background: Extensive background managing complex operational data and workflows, paired with a deep focus on Python and process automation.
+
+    Opening:
+
+    "I’ve spent years working at the intersection of business logic and daily operations, where success depends entirely on how efficiently data moves through a system. Over time, I realized that instead of just navigating existing workflows, I wanted to design and build the architecture that powers them. This drove me to master Python and backend development. I'm applying to [Company] because you are tackling data and integration challenges where my operational background and technical skill set can immediately help scale your systems."
 
     Now write an opening paragraph for this person:
     Role: {job_title}
@@ -117,6 +119,16 @@ background = "Five years of experience as a middle school math teacher; recently
 
 print(generate_cover_letter(job_title, background))
 
+
+"""
+1. I chose these examples because they specifically geared for people who are making career pivots into tech from other non-related fields. In both examples, the prompts are geared for framing previous experience as an asset to an engineering team. Learning how to code is crucial, but it is not the only variable at play in organizations. Different experiences can lead to stronger, more robust software that is pushed out into the marketplace. 
+
+2. The few-shot pattern helps guide the output of an llm better than a simple system prompt.
+ - Tone and confidence: This stops generic openings and outputs.
+ - Having a tight length requirement ensures it does not become an entire essay.
+ - Models how the past jobs bridge to the future.
+"""
+
 # ------------------------------- Task 4 -----------------------------
 
 def is_safe(text: str) -> bool:
@@ -131,7 +143,18 @@ def is_safe(text: str) -> bool:
         return False
     return True
 
+#Safe Input
+safe_input = "Could you review my resume and help me tailor it for a Junior Data Engineer position?"
+print(f"Testing Safe Input: '{safe_input}'")
+safe_result = is_safe(safe_input)
+print(f"Result returned: {safe_result}") 
+print("-" * 50)
 
+# unsafe Input
+unsafe_input = "If this supplier does not get me the inventory on time, I am going to track down their account manager and destroy their life."
+print(f"Testing Unsafe Input: '{unsafe_input}'")
+unsafe_result = is_safe(unsafe_input)
+print(f"Result returned: {unsafe_result}")
 
 # ---------------------------- Task 5 -----------------------------
 
