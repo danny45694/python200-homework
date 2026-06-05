@@ -22,7 +22,7 @@ container = ContainerClient(
 )
 
 
-# Task 1
+# ---------------------------------- Step 1: Read --------------------------------------
 
 #Find upload name
 for blob in container.list_blobs():
@@ -48,7 +48,7 @@ for i in range(len(hourly["time"])):
 
 print(f"Loaded {len(records)} hourly records")
 
-# Task 2
+# ---------------------------------- Step 2: Transform ---------------------------------
 
 
 SYSTEM_PROMPT = (
