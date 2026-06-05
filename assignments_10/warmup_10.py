@@ -61,8 +61,22 @@ In pipelines, prompts should be constrained to output a single response. Open-en
 
 The Azure OpenAI takes the following parameters: azure_endpoint, api_version, model.
 
-azure_endpoint takes the 
+azure_endpoint takes the unique url provided by Azure for your specific AI resource. It replaces the default OpenAI base URL to route requests to the Azure Cloud space.
+
+api_version - Specific API version you are targeting. Azure requires this for correct routing and feature support. 
 
 model takes the deployment name, not a model name. In Azure OpenAI, you call the named deployment the admin created and configured. 
+
+"""
+
+#Q3
+
+"""
+
+model takes deployment name, not a model name. YOu call a named deployment that is setup by an admin. The name is chosen by whoever set it up and can be anything. 
+
+When you start a job and need to connect to Azure OpenAI, you use:
+1. endpoint url and deployment name. Both are found in the Azure AI Foundry
+2. Platform and team may also supply this to you.
 
 """
