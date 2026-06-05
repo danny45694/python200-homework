@@ -81,17 +81,43 @@ for i, record in enumerate(records):
     raw_label = response.choices[0].message.content.strip().lower()
     label = raw_label if raw_label in VALID_LABELS else "unknown"
     enriched.append({**record, "conditions": label})
-    if (i + 1) % 24 == 0:
-        print(f"  Processed {i + 1} records...")
     if (i + 1) % 6 == 0:
         print("6 records processed and running.")
+    if (i + 1) % 24 == 0:
+        print(f"  Processed {i + 1} records...")
+    
 
 # Load
-processed_path = f"processed/{blob_path}/weather_classified.json"
+processed_path = f"processed/{blob_path}"
 container.upload_blob(processed_path, json.dumps(enriched).encode("utf-8"), overwrite=True)
 print(f"Uploaded to {processed_path}")
 
-# Spot-check
-df = pd.DataFrame(enriched)
-print("\nLabel distribution:")
-print(df["conditions"].value_counts())
+
+# --------------------------------- Step 3: Write ---------------------------------------
+
+processed_path = f"processed/{blob_path}"
+payload = json.dumps(enriched).encode("utf-8")
+container.upload_blob(processed_path, payload, overwrite=True)
+print(f"Uploaded {len(payload)} bytes to {processed_path}")
+
+
+
+# -------------------------------- Step 4: Spot-Check ----------------------------------
+
+raw = container.download_blob(payload).readall()
+data = json.loads(raw.decode("utf-8"))["hourly"]
+
+df = pd.Dataframe(json.loads(raw.decode("utf-8"))["hourly"])
+print(f"\nFirst 5 rows:")
+print(df.head())
+
+
+# ------------------------------- Step 5: Save Output ----------------------------------
+
+outputs = "outputs"
+file_name = "first_10_records.json"
+
+full_path = os.path.join(outputs, file_name)
+
+with open(full_path, "w", encoding="utf-8") as file:
+    json.dump(data, file)
