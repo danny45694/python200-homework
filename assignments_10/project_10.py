@@ -22,6 +22,18 @@ container = ContainerClient(
 )
 
 
+# -------------------------------- Step 6: Reflect --------------------------------------
+
+
+"""
+Traditional code struggles with this because it relies on strict rules. To write a program for outdoor running, you'd have to code for endless edge cases—like accounting for tropical humidity or sudden tornadoes. Make the rules too strict, and the app will never let you run. Make them too loose, and you'll get caught in a hurricane.
+
+LLMs naturally understand these complex weather trends and context, making them much better at finding the right balance.
+
+"""
+
+
+
 # ---------------------------------- Step 1: Read --------------------------------------
 
 #Find upload name
@@ -107,7 +119,7 @@ print(f"Uploaded {len(payload)} bytes to {processed_path}")
 raw = container.download_blob(payload).readall()
 data = json.loads(raw.decode("utf-8"))["hourly"]
 
-df = pd.Dataframe(json.loads(raw.decode("utf-8"))["hourly"])
+df = pd.DataFrame(json.loads(raw.decode("utf-8")))
 print(f"\nFirst 5 rows:")
 print(df.head())
 
@@ -121,3 +133,7 @@ full_path = os.path.join(outputs, file_name)
 
 with open(full_path, "w", encoding="utf-8") as file:
     json.dump(data, file)
+
+
+
+
