@@ -36,12 +36,18 @@ LLMs naturally understand these complex weather trends and context, making them 
 
 # ---------------------------------- Step 1: Read --------------------------------------
 
+
+
 #Find upload name
 for blob in container.list_blobs():
-    blob_path = (f"{blob.name}")
     print(f" {blob.name} ({blob.size} bytes)")
 
 # Copied uploaded file name
+# raw/2026-06-01/weather.json
+
+
+
+blob_path = "raw/2026-06-01/weather.json"
 
 #Download
 raw = container.download_blob(blob_path).readall()
@@ -133,7 +139,4 @@ full_path = os.path.join(outputs, file_name)
 
 with open(full_path, "w", encoding="utf-8") as file:
     json.dump(data, file)
-
-
-
 
