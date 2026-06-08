@@ -47,4 +47,19 @@ I can narrow down from there.
 """
 
 raise_for_status surface errors cleanly. It stops the program from continuing when something goes wrong, makes you deal with the responses early, and makes error handling structured and consistent. 
+
+
+"""
+
+# Q2
+
+"""
+Overwrite = True protects you from the program crashing if an existing file already exists. It automatically replaces old data with new data in the same location, saving you from needing to manually delete the old file. Without the overwrite = True, your program will crash/halt each time you run it, even if the pipeline code is bugfree. 
+"""
+
+# Q3 
+
+"""
+
+
 """
