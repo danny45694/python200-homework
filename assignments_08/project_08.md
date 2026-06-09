@@ -1,4 +1,9 @@
 
+Video Link - https://youtu.be/2sIgGudZS-g
+
+
+
+
 Scenario A: Lightweight Compute
 
 For a standard VM with 1 vCPU and 1GL RAM, cost is $2.24 per month. Seeing as the compute requirements is low, the cost is not surprising. For running simple scripts, it should perfectly fine.
