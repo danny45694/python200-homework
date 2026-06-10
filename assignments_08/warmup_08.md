@@ -18,7 +18,7 @@
 #Q3 
 
 Gmail - SaaS. It is a fully developed, ready to use software solution
-Azure VM - PaaS. SWE's use it to develop software safely.
+Azure VM - LaaS. SWE's use it to develop software safely.
 Azure App Service - PaaS. Same as Azure VM.
 AWS S3 - LaaS. Online storage solution people use to store files.
 GitHub Codespaces - PaaS - Online platform for developers to develop software
@@ -50,7 +50,7 @@ Q2. Ephemeral - Each time you close shell, everything gets deleted. To ensure it
 
 Q3. SSH operates in key pairs. They prove identity without transmitting a password. Private key stay on local machines while public key is uploaded to the systems you want access to. When connecting SSH verifies the key match, bypassing the need for a password crossing the network.
 
-Q4. Need to run a script in Azure Cloud
+Q4. --output table displays only high-level properties such as Name, CloudName, SubscriptionId, and State. 
 
 daniel [ ~/clouddrive ]$ az account show
 {
