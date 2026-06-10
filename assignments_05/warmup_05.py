@@ -193,10 +193,15 @@ messages= messages
 )
 print(response.choices[0].message.content)
 
-# Adding the example changes the format provided by the AI.
+
+#Adding the example changes the format provided by the AI.
+
+
+
 
 #Q3
 print("Q3")
+
 
 prompt_q3 = """
 
@@ -236,7 +241,11 @@ messages= messages
 )
 print(response.choices[0].message.content)
 
-#
+"""
+
+After comparing the zero-shot, one-shot and few-shot, I would go with few-shot. Originally, I felt the zero-shot output was very similar to the few-shot but required less work. Therefore I felt it was better. On further thinking, I realized the zero-shot will not output the same each time. To ensure consistency, few-shot is my answer.
+
+"""
 
 #Q4
 
@@ -269,28 +278,31 @@ import json
 
 prompt_q5 = """
 
-Analyze the review below and respond ONLY with valid JSON. Keys: Sentiment (positive/negative/mixed), confidence(a float from 0 to 1), and reason(one sentence).
+Classify the review and respond ONLY with valid JSON. 
+Keys: Sentiment (positive/negative/mixed), confidence(a float from 0 to 1), and reason(one sentence).
+Example: {"sentiment": "mixed", "confidence": 0.8, "brief_reason": "Positive product, negative shipping experience"}
 
-review = "I've been using this tool for three months. It handles large datasets well, \
+Review: "I've been using this tool for three months. It handles large datasets well, \
 but the UI is clunky and the export options are limited."
 """
 
-messages = [
+messages_q5 = [
     {"role": "user", "content": prompt_q5}
 ]
 
 
-response = client.chat.completions.create(
+response_5 = client.chat.completions.create(
 model="gpt-4o-mini",
-messages= messages
+messages= messages_q5
 )
 
-print("Raw response:", response)
+print("Raw response:", response_5)
 
 try:
-    result = json.loads(response.choices[0].message.content)
+    result = json.loads(response_5.choices[0].message.content)
     print("Parsed sentiment:", result["sentiment"])
     print("Confidence:", result["confidence"])
+    print("Reason:", result["brief_reason"])
 except json.JSONDecodeError:
     print("Error: response was not valid JSON")
     print("Raw Response:", response)
@@ -298,6 +310,8 @@ except json.JSONDecodeError:
 
 #6
 
+
+print("Q6")
 user_text = "First boil a pot of water. Once boiling, add a handful of salt and the \
 pasta. Cook for 8-10 minutes until al dente. Drain and toss with your sauce of choice."
 
