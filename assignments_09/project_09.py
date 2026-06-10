@@ -13,7 +13,7 @@ from datetime import date
 import os
 
 
-account_url = "https://danielctd2026sa.blob.core.windows.net"
+ACCOUNT_URL = "https://danielctd2026sa.blob.core.windows.net"
 CONTAINER = "pipeline-data"
 
 
@@ -26,7 +26,7 @@ for sub in client.subscriptions.list():
     print(sub.display_name)
 
 container = ContainerClient(
-    account_url=account_url,
+    account_url=ACCOUNT_URL,
     container_name="pipeline-data",
     credential=credential
 )
@@ -56,7 +56,7 @@ blob_path = f"raw/{today}/weather.json"
 """
 
 container.upload_blob(blob_path, payload, overwrite=True)
-print(f"Uploaded to {blob_path}")
+print(f"Uploaded to {len(payload)} bytes to {blob_path}")
 
 
 
@@ -79,7 +79,10 @@ print(full_path)
 
 
 raw = container.download_blob(blob_path).readall()
-data = json.loads(raw.decode("utf-8"))["hourly"]
+
+#Airbud said I need to save the full raw file. Not hourly. Adjusted code accordingly.
+data = json.loads(raw.decode("utf-8"))
+#data = json.loads(raw.decode("utf-8"))["hourly"]
 
 df = pd.DataFrame(json.loads(raw.decode("utf-8"))["hourly"])
 print(f"\nFirst 5 rows:")

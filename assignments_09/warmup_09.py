@@ -7,7 +7,7 @@ from azure.identity import DefaulyAzureCredential
 #Q1 
 
 """
-When running a python script that uses DefaultAzureCredential locally, it requires a Managed identity. It is a special type of service principal that Azure manages.
+When running a python script that uses DefaultAzureCredential locally, it requires a Azure CLI token that is obtained from running az login. 
 
 To use it, you need the azure-identity and azure-mgmt-resource packages. Installed with:
 
@@ -29,11 +29,10 @@ A deployed pipeline can't use the az login because there is no human around to r
 """
 The 2 most likely causes is:
 
-1. Az login not setup or session expired
 
-2. Session expired
+1. Session not active or expired
 
-I would use the code below to verify az login is in place. If this works without errors, it is not the az login. If it does, we try freshing the session. If that fails, I would try refreshing the session.
+I would use the code below to verify az login is active. If this works without errors, it is not the az login. If it does, we try freshing the session. If that fails, I would try refreshing the session.
 
     from azure.identity import DefaultAzureCredential
     from azure.mgmt.resource import SubscriptionClient
@@ -44,6 +43,7 @@ I would use the code below to verify az login is in place. If this works without
     for sub in client.subscriptions.list():
         print(sub.display_name)
  
+2. If the above does not work, it means we are missing the environment credentials. If this was the case, I would try re-running az login, checking if I entered the account details correctly. If that doesn't work, I will try installing the Azure CLI program, trying a different means of activating (As in my case, I installed the Azure CLI and ran it with command prompt so it would work)
 
 """
 
