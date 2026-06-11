@@ -17,7 +17,7 @@ What the script printed:
 
 daniel [ ~/clouddrive/python200-homework/assignments_08 ]$ python3 project_08.py
 === Monthly Cost Estimates ===
-Scenario A (lightweight):       $358.40
+Scenario A (lightweight):       $2.24
 Scenario B (GPU VM only):       $2435.28
 Scenario B VM costs 6.8x more than Scenario A
 
