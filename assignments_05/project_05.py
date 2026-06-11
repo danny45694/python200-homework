@@ -1,3 +1,6 @@
+
+#Task 1
+
 from dotenv import load_dotenv
 from openai import OpenAI
 import json
@@ -26,6 +29,8 @@ You are a job application coach. You are in the business of helping individuals 
 
 # Task 2
 
+print()
+print("task 2")
 
 #Function is behaving correctly.
 
@@ -47,8 +52,7 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
     Return ONLY a valid JSON list. Respond ONLY with valid JSON, no other text. Each item should have two keys:
     "original" (the original bullet) and "improved" (your rewritten version).
 
-    # f is causing the "the original bullet" to become a string bullet. 
-    Example: [{"original": "the original bullet"}, {"improved": "your rewritten version"} ]
+    Do not output ``` JSON ```.
 
     Bullet points:
     ```
@@ -61,6 +65,7 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
     response = get_completion(messages, model="gpt-4o-mini", temperature=0.7)
     print("Raw response:", response)
 
+    
     try:
         result = json.loads(response)
         for item in result:
@@ -81,6 +86,8 @@ The starter bullets are weak because they only list tasks. They did not delve in
 
 # ---------------------------- Task 3 ------------------------------
 
+print()
+print("Task 3")
 
 def generate_cover_letter(job_title: str, background: str) -> str:
     prompt = f"""
@@ -139,6 +146,9 @@ print(generate_cover_letter(job_title, background))
 
 # ------------------------------- Task 4 -----------------------------
 
+print()
+print("Task 4")
+
 def is_safe(text: str) -> bool:
     result = client.moderations.create(
         model="omni-moderation-latest",
@@ -165,6 +175,9 @@ unsafe_result = is_safe(unsafe_input)
 print(f"Result returned: {unsafe_result}")
 
 # ---------------------------- Task 5 -----------------------------
+
+print()
+print("Task 5")
 
 system_prompt = """
 You are Job Application Helper. You help job seekers with their applications by:
@@ -249,6 +262,10 @@ if __name__ == "__main__":
 
 
 # ----------------------------- Task 6 --------------------------------
+
+print()
+
+print("Task 6")
 
 
 user_text = "First boil a pot of water. Once boiling, add a handful of salt and the \
