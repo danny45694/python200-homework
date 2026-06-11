@@ -47,6 +47,9 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
     Return ONLY a valid JSON list. Respond ONLY with valid JSON, no other text. Each item should have two keys:
     "original" (the original bullet) and "improved" (your rewritten version).
 
+    # f is causing the "the original bullet" to become a string bullet. 
+    Example: [{"original": "the original bullet"}, {"improved": "your rewritten version"} ]
+
     Bullet points:
     ```
     {bullet_text}
@@ -67,8 +70,13 @@ def rewrite_bullets(bullets: list[str]) -> list[dict]:
     except json.JSONDecodeError:
         print("Error: response was not valid JSON")
 
-
 rewrite_bullets(bullets)
+
+
+"""
+The starter bullets are weak because they only list tasks. They did not delve into HOW they completed these tasks, the impact of these actions and the outcomes that came from their efforts. 
+
+"""
 
 
 # ---------------------------- Task 3 ------------------------------
