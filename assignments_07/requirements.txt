@@ -1,0 +1,11 @@
+scipy
+pandas
+smolagents
+matplotlib
+openai
+python-dotenv
+numpy
+llama-index
+scikit-learn
+prefect
+prefect-sqlalchemy
