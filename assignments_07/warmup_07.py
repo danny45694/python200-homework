@@ -62,12 +62,12 @@ tools = [
 print('Tools list defined with one tool: celsius_to_fahrenheit')
 
 
-"""
+
 list = [0, 100, -40]
 
 for num in list:
     print(celsius_to_fahrenheit(num))
-"""
+
 
 #Q2
 
