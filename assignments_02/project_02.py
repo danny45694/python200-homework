@@ -74,9 +74,8 @@ print('p-value:', round(p2, 4))
 
 #Double bracket ensures 2D, which sns.heatmap needs
 correlation_matrix = df2.corr(method='pearson')[["G3"]]
-G3_comparison = correlation_matrix["G3"]
 
-sorted_mat = G3_comparison.sort_values(by="G3", ascending=False)
+sorted_mat = correlation_matrix.sort_values(by="G3", ascending=False)
 print(sorted_mat)
 
 
@@ -89,7 +88,20 @@ plt.title("Correlation Rank with G3")
 plt.show()
 
 
-sns.histplot(data=sorted_mat)
+plt.figure(figsize=(10, 6))
+sns.barplot(
+    data=df2,
+    x="Medu",              
+    y="G3",                
+    hue="Fedu",            
+    palette="coolwarm",
+)
+plt.title("Parent effect on G3 Scores")
+plt.xlabel("Mom education level (Medu)")
+plt.ylabel("Mean G3 Score")
+plt.legend(title="Father's education level (Fedu)")
+plt.tight_layout()
+plt.show()
 
 # Need to develop 2 charts. Will make a heatmap and hist chart showing distribution of scores.
 
@@ -122,7 +134,7 @@ print("R²:", r2)
 
 #Task 5 : Build the Full Model
 
-feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime"]
+feature_cols = ["failures", "Medu", "Fedu", "studytime", "higher", "schoolsup", "internet", "sex", "freetime", "activities", "traveltime", "G1"]
 
 df_clean = df2.copy()
 X = df_clean[feature_cols].values
@@ -139,8 +151,8 @@ y_train_prediction = T5_model.predict(x_train)
 y_test_prediction = T5_model.predict(x_test)
 
 t5_rmse = np.sqrt(mean_squared_error(y_test, y_test_prediction))
-r2_test = r2_score(y_train, y_train_prediction)
-r2_train = r2_score(y_test, y_test_prediction)
+r2_train = r2_score(y_train, y_train_prediction)
+r2_test = r2_score(y_test, y_test_prediction)
 
 for name, coef in zip(feature_cols, T5_model.coef_):
     print(f"{name:12s}: {coef:+.3f}")
@@ -149,5 +161,24 @@ for name, coef in zip(feature_cols, T5_model.coef_):
 
 #Task 6: Evaluate and Summarize
 
+plt.figure(figsize=(8, 5))
+plt.scatter(y_test, y_test_prediction, alpha=0.6, color="steelblue", edgecolors="k", linewidths=0.4)
+plt.plot([y_test.min(), y_test.max()], [y_test.min(), y_test.max()], 'r--', lw=2, label="Perfect Fit")
+plt.title("Actual vs Predicted G3 Scores (Full Model)")
+plt.xlabel("Actual G3")
+plt.ylabel("Predicted G3")
+plt.legend()
+plt.tight_layout()
+output_file("actual_vs_predicted.png")
 
 
+plt.figure(figsize=(10, 5))
+coef_df = pd.DataFrame({"Feature": feature_cols, "Coefficient": T5_model.coef_})
+coef_df = coef_df.sort_values("Coefficient", ascending=False)
+sns.barplot(data=coef_df, x="Coefficient", y="Feature", palette="coolwarm")
+plt.axvline(0, color="black", linewidth=0.8, linestyle="--")
+plt.title("Feature Coefficients — Full Model")
+plt.tight_layout()
+output_file("feature_coefficients.png")
+
+#A high correlation does not equal the root cause. This is definitely a useful model for identifying factors that affect a students performance. If educators wanted to intervene early, providing internet access and study time is the route to go. Educators are unable to control a students background such as family's education levels or economic standing. They are able to control internet and study time however. That also so happens to be a very good indicator (outside of G1) of studies performing well on their final G3 exam. 
