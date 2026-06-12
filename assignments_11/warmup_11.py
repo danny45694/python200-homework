@@ -14,6 +14,7 @@ Tasks handle retries, caching, dependency tracking etc. Tasks should be simple a
 Flow handles state tracking for the whole workflow and supports parameters, schedules and deployments.
 
 I would not decorate the Celsius to Fahrenheit helper function. Prefect is designed for things that may fail, like an API or querying a databse. They are more focused on I/O actions. Adding @task to simple, lightweight functions that perform quick calculations is counter-productive. 
+
 """
 
 
@@ -21,8 +22,11 @@ I would not decorate the Celsius to Fahrenheit helper function. Prefect is desig
 
 
 """
+
 @task(retries=3, retry_delay_seconds=30)
 def call_api:
+    continue
+
 """
 
 #Q3
@@ -55,11 +59,20 @@ raise_for_status surface errors cleanly. It stops the program from continuing wh
 
 """
 Overwrite = True protects you from the program crashing if an existing file already exists. It automatically replaces old data with new data in the same location, saving you from needing to manually delete the old file. Without the overwrite = True, your program will crash/halt each time you run it, even if the pipeline code is bugfree. 
+
 """
 
 # Q3 
 
 """
 
+@task()
+def signature(records, blob_path):
+
+    raw = container.download_blob(blob_path).readall()
+    data = json.loads(raw.decode("utf-8"))
+
+    logger = get_run_logger()
+    logger.info(f"Loaded {len(records)}")
 
 """
