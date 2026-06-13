@@ -3,7 +3,6 @@ import requests
 import json
 import os
 from datetime import date
-import pandas as pd
 from dotenv import load_dotenv
 from openai import OpenAI
 from prefect import task, flow
