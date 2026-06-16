@@ -70,7 +70,7 @@ def transform_task(data):
 
     VALID_LABELS = {"good", "marginal", "bad"}
 
-    client = OpenAI(api_key=os.environ["OPEN_API_KEY"])
+    client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
     enriched = []
     for i, record in enumerate(records):
         response = client.chat.completions.create(
