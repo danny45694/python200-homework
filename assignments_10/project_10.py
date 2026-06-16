@@ -86,7 +86,7 @@ def make_user_message(record):
         f"Precipitation: {record['precipitation']}mm"
     )
 
-client = OpenAI(api_key=os.environ["OPEN_API_KEY"])
+client = OpenAI(api_key=os.environ["OPENAI_API_KEY"])
 enriched = []
 for i, record in enumerate(records):
     response = client.chat.completions.create(
@@ -102,32 +102,36 @@ for i, record in enumerate(records):
     if (i + 1) % 6 == 0:
         print("6 records processed and running.")
     if (i + 1) % 24 == 0:
-        print(f"  Processed {i + 1} records...")
+        print(f"  Processed 24 records. Stopping here.")
+        break
     
-
-# Load
-processed_path = f"processed/{blob_path}"
-container.upload_blob(processed_path, json.dumps(enriched).encode("utf-8"), overwrite=True)
-print(f"Uploaded to {processed_path}")
 
 
 # --------------------------------- Step 3: Write ---------------------------------------
 
-processed_path = f"processed/{blob_path}"
+today = date.today().isoformat()
+
+
+processed_path = f"processed/{today}/weather_classified.json"
 payload = json.dumps(enriched).encode("utf-8")
-container.upload_blob(processed_path, payload, overwrite=True)
+container.upload_blob(name=processed_path, data=payload, overwrite=True)
 print(f"Uploaded {len(payload)} bytes to {processed_path}")
 
 
 
 # -------------------------------- Step 4: Spot-Check ----------------------------------
 
-raw = container.download_blob(payload).readall()
-data = json.loads(raw.decode("utf-8"))["hourly"]
+raw = container.download_blob(processed_path).readall()
+data = json.loads(raw.decode("utf-8"))
 
-df = pd.DataFrame(json.loads(raw.decode("utf-8")))
+df = pd.DataFrame(enriched)
+
+print()
+print(df["conditions"].value_counts())
+
+print()
 print(f"\nFirst 5 rows:")
-print(df.head())
+print(df.head(5))
 
 
 # ------------------------------- Step 5: Save Output ----------------------------------
@@ -138,5 +142,6 @@ file_name = "first_10_records.json"
 full_path = os.path.join(outputs, file_name)
 
 with open(full_path, "w", encoding="utf-8") as file:
-    json.dump(data, file)
+    json.dump(data[:10], file)
+    print(f'Saved to {full_path}')
 
