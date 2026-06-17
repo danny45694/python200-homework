@@ -10,6 +10,8 @@ from dotenv import load_dotenv
 from openai import OpenAI
 from azure.storage.blob import ContainerClient
 from azure.identity import DefaultAzureCredential
+from azure.core.exceptions import ResourceNotFoundError
+
 
 load_dotenv()
 
@@ -50,12 +52,18 @@ for blob in container.list_blobs():
 # raw/2026-06-01/weather.json
 
 
-
 blob_path = "raw/2026-06-01/weather.json"
+fallback_path = "weather_raw.json"
 
-#Download
-raw = container.download_blob(blob_path).readall()
-data = json.loads(raw.decode("utf-8"))
+# Try today's blob first, fall back to local file if it isn't there
+try:
+    raw = container.download_blob(blob_path).readall()
+    data = json.loads(raw.decode("utf-8"))
+    print(f"Loaded from blob: {blob_path}")
+except ResourceNotFoundError:
+    print(f"Blob not found ({blob_path}), falling back to {fallback_path}")
+    with open(fallback_path, "r", encoding="utf-8") as f:
+        data = json.load(f)
 
 hourly = data["hourly"]
 
