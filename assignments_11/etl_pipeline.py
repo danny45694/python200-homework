@@ -29,7 +29,7 @@ client = SubscriptionClient(credential)
 
 
 
-@task
+@task(retries=2, retry_delay_seconds=10)
 def extract_task():
     logger = get_run_logger()
 

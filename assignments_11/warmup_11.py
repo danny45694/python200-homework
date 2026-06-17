@@ -34,11 +34,7 @@ def call_api:
 
 """
 
-To see what happened, you can click on the specific flow and the following page will provide detailed information about individual tasks and logs. 
-
-Here you can see Info, warning and error logs. If it failed in the transform step, first thing is to check the code in the transform step. I'd check if the input is correct, if correct, the error is isolated to the transform area. If input is incorrect, the extract location is where the bug resides. 
-
-I can narrow down from there. 
+To see what happened, you can click on the specific flow/task and review the logs tab to see the exception message that caused the failure.
 
 """
 
@@ -50,7 +46,7 @@ I can narrow down from there.
 
 """
 
-raise_for_status surface errors cleanly. It stops the program from continuing when something goes wrong, makes you deal with the responses early, and makes error handling structured and consistent. 
+raise_for_status raises exceptions that stop execution. It stops the program from continuing when something goes wrong, makes you deal with the responses early, and makes error handling structured and consistent. It is so tasks downstream don't run. print won't stop program from continuing.
 
 
 """
@@ -68,9 +64,6 @@ Overwrite = True protects you from the program crashing if an existing file alre
 
 @task()
 def signature(records, blob_path):
-
-    raw = container.download_blob(blob_path).readall()
-    data = json.loads(raw.decode("utf-8"))
 
     logger = get_run_logger()
     logger.info(f"Loaded {len(records)}")
