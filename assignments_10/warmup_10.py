@@ -35,7 +35,7 @@ In pipelines, prompts should be constrained to output a single response. Open-en
 #Q3
 
 """
-1. If each call takes 1 second on average when processing 50K records, it will take 13 hours of processing.
+1. If each call takes 1 second on average when processing 50K records, it will take 13.9 hours of processing.
 
 2. One practical strategy is batching. You split the work into smaller batches and spread it out among different machines. Smaller models may be used.
 
@@ -59,13 +59,13 @@ In pipelines, prompts should be constrained to output a single response. Open-en
 
 """
 
-The Azure OpenAI takes the following parameters: azure_endpoint, api_version, model.
+The Azure OpenAI takes the following parameters: azure_endpoint, api_version, deployment_name.
 
 azure_endpoint takes the unique url provided by Azure for your specific AI resource. It replaces the default OpenAI base URL to route requests to the Azure Cloud space.
 
 api_version - Specific API version you are targeting. Azure requires this for correct routing and feature support. 
 
-model takes the deployment name, not a model name. In Azure OpenAI, you call the named deployment the admin created and configured. 
+deployment_name takes the deployment name, not a model name. In Azure OpenAI, you call the named deployment, which the LLM API, the admin created and configured. 
 
 """
 
