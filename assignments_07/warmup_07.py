@@ -33,6 +33,7 @@ def celsius_to_fahrenheit(celsius: float) -> str:
     fahrenheit = (celsius * 9 / 5) + 32
     return f"{celsius}°C is {fahrenheit}°F"
 
+
 #Not sure if I need this for question 2
 def get_current_time() -> str:
     '''Return the current local time as a formatted string.'''
@@ -57,9 +58,21 @@ tools = [
                 'required': ['celsius'],
             }
         },
+    },
+    {
+        'type': 'function',
+        'function': {
+            'name': 'get_current_time',
+            'description': 'Returns the current local time as a string.',
+            'parameters': {
+                'type': 'object',
+                'properties': {},
+                'required': [],
+            },
+        },
     }
 ]
-print('Tools list defined with one tool: celsius_to_fahrenheit')
+print('Tools list defined with two tools: celsius_to_fahrenheit and get_current_time')
 
 
 
@@ -72,9 +85,109 @@ for num in list:
 #Q2
 
 
-# For this portion, I need to just copy the code from the lesson and try to run the query.
+"""
+1. Calling run_agent("Convert 100 degrees Celsius to Fahrenheit) will not work. This is because the run_agent function from the lesson is only programmed to use the get_current_time as its only tool. When the agent tries to locate the tool to process the request, it will not find one and return an error.
+
+2. 3 calls. Once to call the Agent, call the tool, and finally return the tool output to the Agent and return a result. 
+
+"""
+
+def run_agent(user_prompt: str) -> str:
+    '''Run a minimal ReAct-style agent for a single user prompt.'''
+
+    SYSTEM_PROMPT = '''You are a simple assistant that can tell the current time.
+                     Use the tool get_current_time whenever a user asks about the time.'''
+    
+    # Step 1: start the conversation with system and user messages
+    messages = [
+        {'role': 'system', 'content': SYSTEM_PROMPT},
+        {'role': 'user', 'content': user_prompt},
+    ]
+
+    # Step 2: first API call - the model decides whether to call a tool
+    first_response = client.chat.completions.create(
+        model='gpt-4.1-mini',
+        messages=messages,
+        tools=tools,
+        tool_choice='auto',  # model chooses whether to use a tool
+    )
+
+    print("First response received from model...")
+    print(first_response)
+    first_message = first_response.choices[0].message
+
+    # Record what the model said so far
+    messages.append(
+        {
+            'role': 'assistant',
+            'content': first_message.content,
+            'tool_calls': first_message.tool_calls,
+        }
+    )
+
+    # Step 3: check if the model requested any tools
+    if first_message.tool_calls:
+        print("Agentic mode engaged...")
+        for tool_call in first_message.tool_calls:
+            function_name = tool_call.function.name
+            # In this example we only have one tool: get_current_time
+            if function_name == 'get_current_time':
+                tool_result = get_current_time()
+            else:
+                tool_result = f'Error: unknown tool {function_name}.'
+
+            # Print for debugging so we can see what happened
+            print('Tool called:', function_name)
+            print('Tool result:', tool_result)
+
+            # Step 3b: append the tool output so the model can see it
+            messages.append(
+                {
+                    'role': 'tool',
+                    'tool_call_id': tool_call.id,
+                    'name': function_name,
+                    'content': tool_result,
+                }
+            )
+
+        # Step 4: second API call - model sees the tool result and gives final answer
+        second_response = client.chat.completions.create(
+            model='gpt-4.1-mini',
+            messages=messages,
+        )
+        print("Second response received from model...")
+        print(second_response)
+
+        final_message = second_response.choices[0].message
+        return final_message.content or ''
+    else:
+        print("No tools needed....")
+
+    # If there were no tool calls, the first response was already the final answer
+    return first_message.content or ''
 
 
+
+
+
+
+#-------------------------------------- Prediction -----------------------------------------
+#The function does not run because it is configured to run a number, not a string. 
+
+
+answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
+print(answer)
+
+"""
+I was correct. The AI did not call the tool because it is not programmed to use it. Because the function is expecting a float instead of a number, the program crashes with a TypeError. s
+"""
+
+
+# ------------------------------------------ Q3 ---------------------------------------------
+
+#Modified run_agent function for this question.
+
+# ------------------------- The code below has the run Celsius function incorporated 
 def run_agent(user_prompt: str) -> str:
     #Run a minimal ReAct-style agent for a single user prompt.
 
@@ -113,9 +226,10 @@ def run_agent(user_prompt: str) -> str:
         print(first_message.tool_calls)
         for tool_call in first_message.tool_calls:
             function_name = tool_call.function.name
-            # In this example we only have one tool: get_current_time
+            # Get current time tool
             if function_name == 'get_current_time':
                 tool_result = get_current_time()
+                #Celsius to Fahrenheit tool
             elif function_name == 'celsius_to_fahrenheit':
                 tool_args = json.loads(tool_call.function.arguments or "{}")
                 celsius_value = tool_args["celsius"]
@@ -154,35 +268,16 @@ def run_agent(user_prompt: str) -> str:
     return first_message.content or ''
 
 
-"""
-1. Not sure how to answer. Instructions confusing. Let's assume I am calling the agent with only get_current_time as its only tool. If I can run_agent, it will not trigger the tool call. That is because the agent is not setup for it. 
-
-2. 3 calls. Once to call the AI, trigger the tool, give the output to the AI and response. 
-
-"""
-
-#The function does not run because it is configured to run a number, not a string. 
-
-#answer = run_agent("Convert 100 degrees Celsius to Fahrenheit")
-#print(answer)
-
-"""
-I was correct. The AI did not call the tool because it is not programmed to use it. Because the function is expecting a float instead of a number, the program crashes with a TypeError. s
-"""
-
-
-#Q3
-
-#Modified run_agent function for this question.
-
-
 response_a = run_agent("What is 37 degrees Celsius in Fahrenheit?")
 print("Response A:", response_a)
 
+# ------- Comment ------
 # Tool was called. Tool was used to convert the Celsius value provided to Fahrenheit. 
 
 response_b = run_agent("What is the boiling point of water in plain English?")
 print("Response B:", response_b)
+
+# -------- Comment ------
 # No tool was used. The boiling point of supposedly common knowledge.
 
 
@@ -336,13 +431,16 @@ class CsvManager:
         data1 = self.df[col1]
         data2 = self.df[col2]
         
+        col1_name = data1.name
+        col2_name = data2.name
+
         corr, p = pearsonr(data1, data2)
         pearson_r = round(corr, 4)
         p_value = round(p, 4)
 
         result = {
-            "col1": data1,
-            "col2": data2,
+            "col1": col1_name,
+            "col2": col2_name,
             "pearson_r": pearson_r,
             "p_value": p_value
         }
@@ -762,7 +860,10 @@ api_key = os.getenv("OPENAI_API_KEY")
 
 RESOURCES_DIR = Path("resources")
 
-#Q7 
+
+
+
+# ------------------------------------------ Q7 ---------------------------------------------
 csv_manager = CsvManager(resources_dir=RESOURCES_DIR)
 
 @tool
@@ -943,6 +1044,9 @@ prompt = "Load bike_commute.csv. Plot avg_heart_rate vs duration_min as a scatte
 
 response_tool = tool_agent.run(prompt)
 response_code = code_agent.run(prompt, additional_args={"csv_manager": csv_manager})
+
+print(response_tool)
+print(response_code)
 
 # ToolCallingAgent and Code Agent both changed the dot color and produced different outputs.
 
