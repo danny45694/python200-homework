@@ -76,24 +76,24 @@ def load_happiness_data() -> dict:
         A dict with 'shape' (tuple of rows, columns) and 'columns' (list of column names).
     """
 
+
     global df
     global base
     global DATA_PATH
     global FALLBACK_FOLDER
 
-    if not os.path.exists(DATA_PATH):
-        print("Outputs not found. Attempting fallback to happiness_project folder...")
+    if os.path.exists(DATA_PATH):
+        df = pd.read_csv(DATA_PATH)
+    else:
+        print("Outputs not found. Attempting to fallback to happiness_project folder...")
         if not os.path.exists(FALLBACK_FOLDER):
             return {"error": "Neither the merged file nor raw data folder was found."}
         file_list = file_path(FALLBACK_FOLDER)
         converted_list = convert_list(file_list)
         merged_dataframe = merge_dataframes(converted_list)
-        DATA_PATH = merged_dataframe
-    
-
-    df = pd.read_csv(DATA_PATH)
+        df = merge_dataframes(converted_list)
     if df.empty:
-        return {"error": "DataFrame has issue. Double check path is correct"}
+        return {"error": "DataFrame has no data. There is an issue in the logic that loads the data"}
     return {"shape": df.shape, "columns": df.columns.tolist()}
 
 
@@ -169,8 +169,7 @@ def get_top_n_countries(column: str, year: int, n: int = 5) -> dict:
     result = (df_filtered
               .sort_values(by=column, ascending=False)
               .iloc[:n][['Country', column]])
-    
-
+    result = result.rename(columns={"Country": "country"})
     return result.to_dict(orient='records')
 
     
@@ -185,7 +184,7 @@ You are a data analyst assistant for the World Happiness dataset.
 Use the available tools for loading data, summarizing columns, computing correlations,
 and ranking countries. Write Python code directly only when the tools are not sufficient
 (for example, when creating custom plots or computing something the tools don't cover).
-Be concise and student-friendly in your responses. Provide text-string responses.
+Be concise and student-friendly in your responses. Provide text-string responses. Provide all of the following queries as a text string explanation, do not pass a dictionary object to final_answer.,
 """
 
 agent = CodeAgent(
@@ -204,7 +203,6 @@ if __name__ == "__main__":
 # ------------------------------------- Task 3 ------------------------------------------
 
     queries = [
-        "Provide all of the following queries as a text string explanation, do not pass a dictionary object to final_answer.",
         "Load the happiness data and tell me its shape and column names.",
         "Summarize the happiness_score column.",
         "What is the correlation between gdp_per_capita and happiness_score? Is it statistically significant?",
@@ -242,11 +240,11 @@ if __name__ == "__main__":
 # --- Reflection ---
 
 """
- 1. Agent says the correlation is statistically significant. Stated the correlation score, the p-value and stated if it was significant. 
+ 1. Agent says the correlation is statistically significant. Stated the correlation score, the p-value and stated if it was significant. The cutoff was p < 0.05
 
- 2. The AI consistently required hand-holding and troubleshooting to output what I needed it to do. Really contemplated just giving it the answer and outputting that. Examples: wrote load_happiness stores data into the global df. Proceeds to try to access the file itself. I tell it to run load_happiness first, it will load the df for the other tools. Proceeds to try loading df again. Finally, after everything, instead of giving observations, it loads the dictionary to final_answer({}), which causes the agent to return an empty/unreadable object. 
+ 2. The AI consistently required hand-holding and troubleshooting to output what I needed it to do. Really contemplated just giving it the answer and outputting that. Examples: wrote load_happiness stores data into the global df. Proceeds to try to access the file itself. I tell it to run load_happiness first, it will load the df for the other tools. Proceeds to try loading df again. Finally, after everything, instead of giving observations, it loads the dictionary to final_answer({}), which causes the agent to return an empty/unreadable object. The agent also looked broken on the plot, but the real cause was that the tool-mutated code does not reach the agent-generated code.
 
-3.  Place the AI and files into an isolated environment with os or pathlib. That would probably help it access the files it needs as the CodeAgent seems more of a DIY type of AI.
+3.  Place the AI and files into an isolated environment with os or pathlib. That would probably help it access the files it needs as the CodeAgent seems more of a DIY type of AI. The tool I would also give the AI is a region grouping tool. The AI cannot see the data in the dataframe. This tool would help the AI group and aggregate the data to help it perform tasks such as plot.
 
 """
 
